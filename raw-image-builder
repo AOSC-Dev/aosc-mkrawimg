@@ -86,3 +86,5 @@ if ! ((umount_fail)); then
 else
 	echo "WARNING: umount failed" >&2
 fi
+
+losetup -d $loop_device
