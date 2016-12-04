@@ -49,6 +49,6 @@ do
 	DEVICE_NAME=$i ./raw-image-builder
 	for i in out/*.img # Uncompressed ones
 	do
-		xz -9 $i
+		xz $XZFLAGS $i
 	done
 done
