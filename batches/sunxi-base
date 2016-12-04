@@ -1,0 +1,48 @@
+#! /bin/bash
+
+sunxi_devices_list="
+sun4i-a10-cubieboard
+sun4i-a10-olinuxino-lime
+sun4i-a10-pcduino
+sun4i-a10-pcduino2
+sun5i-a10s-olinuxino-micro
+sun5i-a13-olinuxino
+sun5i-a13-olinuxino-micro
+sun6i-a31s-colorfly-e708-q1
+sun6i-a31s-sina31s
+sun6i-a31s-sinovoip-bpi-m2
+sun7i-a20-cubieboard2
+sun7i-a20-cubietruck
+sun7i-a20-bananapi-m1-plus
+sun7i-a20-bananapi
+sun7i-a20-bananapro
+sun7i-a20-olimex-som-evb
+sun7i-a20-olinuxino-lime2
+sun7i-a20-olinuxino-lime2-emmc
+sun7i-a20-olinuxino-lime
+sun7i-a20-olinuxino-micro
+sun7i-a20-pcduino3
+sun7i-a20-pcduino3-nano
+sun8i-a33-sinlinx-sina33
+
+sun8i-h3-bananapi-m2-plus
+sun8i-h3-orangepi-2
+sun8i-h3-orangepi-one
+sun8i-h3-orangepi-lite
+sun8i-h3-orangepi-pc
+sun8i-h3-orangepi-pc-plus
+sun8i-h3-orangepi-plus
+sun8i-h3-orangepi-plus2e
+sun8i-h3-nanopi-neo
+
+sun5i-a13-q8-tablet
+sun8i-a23-q8-tablet
+sun8i-a33-q8-tablet
+sun8i-a33-q8-tablet-1024x600
+"
+export SOLUTION=sunxi-base
+# TARBALL environment variable is needed
+for i in $sunxi_devices_list
+do
+	DEVICE_NAME=$i ./raw-image-builder
+done
