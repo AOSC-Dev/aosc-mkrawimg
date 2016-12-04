@@ -1,5 +1,7 @@
 #! /bin/bash
 
+rm -f out/* aux_log/*
+
 sunxi_devices_list="
 sun4i-a10-cubieboard
 sun4i-a10-olinuxino-lime
@@ -45,4 +47,8 @@ export SOLUTION=sunxi-base
 for i in $sunxi_devices_list
 do
 	DEVICE_NAME=$i ./raw-image-builder
+	for i in out/*.img # Uncompressed ones
+	do
+		xz -9 $i
+	done
 done
