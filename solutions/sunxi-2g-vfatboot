@@ -46,6 +46,13 @@ EOF
 		touch .rootfs-repartition
 		mkdir -p etc/systemd/system/multi-user.target.wants
 		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+		case $DEVICE_NAME in
+		sun7i-a20-cubietruck|sun7i-a20-bananapi-m1-plus|sun6i-a31s-sinovoip-bpi-m2)
+			# Ampak AP6210
+			mkdir -p lib/firmware/brcm
+			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6210/nvram_ap6210.txt -O lib/firmware/brcm/brcmfmac43362-sdio.txt
+			;;
+		esac
 	popd
 	dd if="${aosc_os_armel_sunxi_boot_out_dir}/u-boot-${DEVICE_NAME}/u-boot-sunxi-with-spl.bin" of="${IMAGE_DEVICE}" bs=1024 seek=8
 	rm -rf "${aosc_os_armel_sunxi_boot}" "${aosc_os_armel_sunxi_boot_out_dir}"
