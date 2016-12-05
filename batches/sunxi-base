@@ -36,11 +36,6 @@ sun8i-h3-orangepi-pc-plus
 sun8i-h3-orangepi-plus
 sun8i-h3-orangepi-plus2e
 sun8i-h3-nanopi-neo
-
-sun5i-a13-q8-tablet
-sun8i-a23-q8-tablet
-sun8i-a33-q8-tablet
-sun8i-a33-q8-tablet-1024x600
 "
 export SOLUTION=sunxi-base
 # TARBALL environment variable is needed
