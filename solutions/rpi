@@ -7,6 +7,14 @@ SECOND_PARTITION_TYPE=ext4
 
 DEPENDENCIES="wget"
 
+EXTRA_FDISK_COMMANDS="
+t
+1
+b
+a
+1
+"
+
 do_fill_image() {
 	pushd p2
 		# Dump the tarball in the root fs.
