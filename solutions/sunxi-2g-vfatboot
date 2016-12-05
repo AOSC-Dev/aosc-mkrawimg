@@ -9,7 +9,7 @@ DEPENDENCIES="uboot-tools wget"
 
 # Note: needs a TARBALL environment variable
 
-aosc_os_armel_sunxi_boot="aosc-os-armel-sunxi-boot-20161203-g43d7aca-linux-4.9-rc7-u-boot-2016.11.tar.xz"
+aosc_os_armel_sunxi_boot="aosc-os-armel-sunxi-boot-20161206-g84af59e-linux-4.9-rc8-u-boot-2016.11.tar.xz"
 aosc_os_armel_sunxi_boot_out_dir="out"
 aosc_os_armel_sunxi_boot_url="https://mirror.anthonos.org/aosc-repacks/aosc-os-armel-sunxi-boot/${aosc_os_armel_sunxi_boot}"
 
