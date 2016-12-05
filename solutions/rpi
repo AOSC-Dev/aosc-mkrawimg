@@ -1,0 +1,23 @@
+IMAGE_TOTAL_SIZE=2048
+DUAL_PARTITION=1
+FIRST_PARTITION_SIZE=128
+
+FIRST_PARTITION_TYPE=vfat
+SECOND_PARTITION_TYPE=ext4
+
+DEPENDENCIES="wget"
+
+do_fill_image() {
+	pushd p2
+		# Dump the tarball in the root fs.
+		tar xfpJ "${TARBALL}"
+		# Prepare for resize.
+		touch .rootfs-repartition
+		mkdir -p etc/systemd/system/multi-user.target.wants
+		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+	popd
+	pushd p1
+		# Move all /boot/* to boot partition.
+		mv ../p2/boot/* .
+	popd
+}
