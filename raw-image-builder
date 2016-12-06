@@ -12,23 +12,23 @@ if [ ! "$DEVICE_NAME" ]; then
 	exit 1
 fi
 
-if [ ! -e solutions/$SOLUTION ]; then
+if [ ! -e solutions/"$SOLUTION" ]; then
 	echo "Cannot find solution file!" >&2
 	exit 1
 fi
 
-source solutions/$SOLUTION
+source solutions/"$SOLUTION"
 
 mkdir -p out aux_log
 
 image_name="${DEVICE_NAME}_${SOLUTION}_$(date -u +%F)"
 
-apt-get install ${DEPENDENCIES} -y > aux_log/${image_name}.log
+apt-get install ${DEPENDENCIES} -y > aux_log/"${image_name}".log
 
-dd if=/dev/zero of=out/${image_name}.img bs=1M count=${IMAGE_TOTAL_SIZE}
+dd if=/dev/zero of=out/"${image_name}".img bs=1M count="${IMAGE_TOTAL_SIZE}"
 
-fdisk out/${image_name}.img << EOF
-$(if (($DUAL_PARTITION)); then
+fdisk out/"${image_name}".img << EOF
+$(if (("$DUAL_PARTITION")); then
 	echo "n"
 	echo "p" # Partition type p-Primary e-Extended
 	echo "1" # Partition number (1-4, default 1)
@@ -48,17 +48,17 @@ else
 fi
 )
 
-${EXTRA_FDISK_COMMANDS}
+"${EXTRA_FDISK_COMMANDS}"
 
 w
 EOF
 
 loop_device=$(losetup -f)
-losetup -P -v ${loop_device} out/${image_name}.img
+losetup -P -v "${loop_device}" out/"${image_name}".img
 
-"mkfs.${FIRST_PARTITION_TYPE}" ${loop_device}p1
-if (($DUAL_PARTITION)); then
-	"mkfs.${SECOND_PARTITION_TYPE}" ${loop_device}p2
+"mkfs.${FIRST_PARTITION_TYPE}" "${loop_device}"p1
+if (("$DUAL_PARTITION")); then
+	"mkfs.${SECOND_PARTITION_TYPE}" "${loop_device}"p2
 fi
 
 # This environment variables are passed to do_fill_image
@@ -67,12 +67,12 @@ export IMAGE_DEVICE="${loop_device}"
 
 temp_dir=$(mktemp -d)
 umonut_fail=0
-pushd $temp_dir
+pushd "$temp_dir"
 	mkdir p1
-	mount ${loop_device}p1 p1
-	if (($DUAL_PARTITION)); then
+	mount "${loop_device}"p1 p1
+	if (("$DUAL_PARTITION")); then
 		mkdir p2
-		mount ${loop_device}p2 p2
+		mount "${loop_device}"p2 p2
 	fi
 	do_fill_image
 	umount p1 || umount_fail=1
@@ -82,9 +82,9 @@ pushd $temp_dir
 popd
 
 if ! ((umount_fail)); then
-	rm -r ${temp_dir}
+	rm -r "${temp_dir}"
 else
 	echo "WARNING: umount failed" >&2
 fi
 
-losetup -d $loop_device
+losetup -d "$loop_device"

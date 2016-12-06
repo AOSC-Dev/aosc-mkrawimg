@@ -1,4 +1,3 @@
-DEVICE_NAME="Raspberry Pi"
 RPI_FIRMWARE_RELEASE="1.20161125"
 RPI_KERN_VER="4.4.36"
 
@@ -25,7 +24,7 @@ do_fill_image() {
 	tar xf ${RPI_FIRMWARE_RELEASE}.tar.gz
 	# Deploy.
 	cp -arv firmware-${RPI_FIRMWARE_RELEASE}/boot/* p1/
-	cp -arv modules/${RPI_KERN_VER}-v7+ p2/usr/lib/modules/
+	cp -arv firmware-${RPI_FIRMWARE_RELEASE}/modules/${RPI_KERN_VER}-v7+ p2/usr/lib/modules/
 	pushd p2
 		# Dump the tarball in the root fs.
 		tar xfpJ "${TARBALL}"
@@ -38,8 +37,9 @@ do_fill_image() {
 		touch .rootfs-repartition
 		mkdir -p etc/systemd/system/multi-user.target.wants
 		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
-	`	# Remove Kernel package, use RPi BSP.
+		# Remove Kernel package, use RPi BSP.
 		chroot . apt purge --yes linux-kernel-* linux+kernel
+		rm -v `find var/log -type f`
 	popd
 	pushd p1
 		# Remove excess
