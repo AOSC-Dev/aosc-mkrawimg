@@ -24,6 +24,7 @@ do_fill_image() {
 	tar xf ${RPI_FIRMWARE_RELEASE}.tar.gz
 	# Deploy.
 	cp -arv firmware-${RPI_FIRMWARE_RELEASE}/boot/* p1/
+	mkdir -pv p2/usr/lib/modules/
 	cp -arv firmware-${RPI_FIRMWARE_RELEASE}/modules/${RPI_KERN_VER}-v7+ p2/usr/lib/modules/
 	pushd p2
 		# Dump the tarball in the root fs.
