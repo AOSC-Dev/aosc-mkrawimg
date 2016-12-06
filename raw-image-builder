@@ -48,7 +48,7 @@ else
 fi
 )
 
-"${EXTRA_FDISK_COMMANDS}"
+${EXTRA_FDISK_COMMANDS}
 
 w
 EOF
