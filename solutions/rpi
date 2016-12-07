@@ -41,6 +41,8 @@ do_fill_image() {
 		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
 		# Remove Kernel package, use RPi BSP.
 		chroot . apt purge --yes linux-kernel-* linux+kernel
+		chroot . apt install firmware-nonfree --yes
+		chroot . apt autoremove --purge -yes
 		rm -v `find var/log -type f`
 	popd
 	pushd p1
