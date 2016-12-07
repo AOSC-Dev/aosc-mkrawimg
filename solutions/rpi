@@ -30,6 +30,7 @@ do_fill_image() {
 		# Dump the tarball in the root fs.
 		tar xfpJ "${TARBALL}"
 		echo "/dev/mmcblk0p2 / ext4 defaults 1 1" >> etc/fstab
+		echo "/dev/mmcblk0p1 / vfat defaults 0 0" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 		echo "FLASHER_SOLUTION=rpi" >> etc/aosc-arm.conf
 		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk0" >> etc/aosc-arm.conf
