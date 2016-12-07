@@ -42,7 +42,7 @@ do_fill_image() {
 		# Remove Kernel package, use RPi BSP.
 		chroot . apt purge --yes linux-kernel-* linux+kernel
 		chroot . apt install firmware-nonfree --yes
-		chroot . apt autoremove --purge -yes
+		chroot . apt autoremove --purge --yes
 		rm -v `find var/log -type f`
 	popd
 	pushd p1
