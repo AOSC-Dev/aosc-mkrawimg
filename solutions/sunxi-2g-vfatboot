@@ -9,33 +9,16 @@ DEPENDENCIES="uboot-tools wget"
 
 # Note: needs a TARBALL environment variable
 
-aosc_os_armel_sunxi_boot="aosc-os-armel-sunxi-boot-20161207-ga0dc2cc-linux-4.9-rc8-u-boot-2016.11.tar.xz"
-aosc_os_armel_sunxi_boot_out_dir="out"
-aosc_os_armel_sunxi_boot_url="https://mirror.anthonos.org/aosc-repacks/aosc-os-armel-sunxi-boot/${aosc_os_armel_sunxi_boot}"
-
 do_fill_image() {
-	wget "${aosc_os_armel_sunxi_boot_url}"
-	tar xf "${aosc_os_armel_sunxi_boot}"
 	if [ "$(echo $DEVICE_NAME | cut -c 1-5)" = "sun4i" ] || [ "$(echo $DEVICE_NAME | cut -c 1-5)" = "sun5i" ]; then
 		kernel_variant=nokvm
 	else
 		kernel_variant=kvm
 	fi
-	pushd p1
-		cp ../${aosc_os_armel_sunxi_boot_out_dir}/linux-sunxi-${kernel_variant}/zImage .
-		cp ../${aosc_os_armel_sunxi_boot_out_dir}/dtb-${DEVICE_NAME}/dtb.dtb .
-		cat > boot.cmd << EOF
-setenv bootargs console=ttyS0,115200 panic=5 console=ttyUSB0 console=tty0 rootwait root=/dev/mmcblk0p2 earlyprintk rw
-load mmc 0:1 0x43000000 dtb.dtb
-load mmc 0:1 0x42000000 zImage
-bootz 0x42000000 - 0x43000000
-EOF
-		mkimage -C none -A arm -T script -d boot.cmd boot.scr
-	popd
 	pushd p2
 		tar xfpJ "${TARBALL}"
 		mkdir -p usr/lib/modules
-		cp -r ../${aosc_os_armel_sunxi_boot_out_dir}/linux-sunxi-${kernel_variant}/modules/* usr/lib/modules/
+		cp -r usr/lib/aosc-os-armel-sunxi-boot/linux-sunxi-${kernel_variant}/modules/* usr/lib/modules/
 		mkdir -p etc/
 		echo "/dev/mmcblk0p2 / ext4 defaults 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
@@ -54,6 +37,16 @@ EOF
 			;;
 		esac
 	popd
-	dd if="${aosc_os_armel_sunxi_boot_out_dir}/u-boot-${DEVICE_NAME}/u-boot-sunxi-with-spl.bin" of="${IMAGE_DEVICE}" bs=1024 seek=8
-	rm -rf "${aosc_os_armel_sunxi_boot}" "${aosc_os_armel_sunxi_boot_out_dir}"
+	pushd p1
+		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/linux-sunxi-${kernel_variant}/zImage .
+		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
+		cat > boot.cmd << EOF
+setenv bootargs console=ttyS0,115200 panic=5 console=ttyUSB0 console=tty0 rootwait root=/dev/mmcblk0p2 earlyprintk rw
+load mmc 0:1 0x43000000 dtb.dtb
+load mmc 0:1 0x42000000 zImage
+bootz 0x42000000 - 0x43000000
+EOF
+		mkimage -C none -A arm -T script -d boot.cmd boot.scr
+	popd
+	dd if="p2/usr/lib/aosc-os-armel-sunxi-boot/u-boot-${DEVICE_NAME}/u-boot-sunxi-with-spl.bin" of="${IMAGE_DEVICE}" bs=1024 seek=8
 }
