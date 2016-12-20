@@ -35,7 +35,7 @@ do_fill_image() {
 			mkdir -p lib/firmware/brcm
 			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6210/nvram_ap6210.txt -O lib/firmware/brcm/brcmfmac43362-sdio.txt
 			;;
-		sun8i-h2-plus-orangepi-plus)
+		sun8i-h2-plus-orangepi-zero)
 			# Allwinner XR819
 			mkdir -p lib/firmware
 			for i in boot fw sdd
