@@ -40,7 +40,7 @@ do_fill_image() {
 			mkdir -p lib/firmware
 			for i in boot fw sdd
 			do
-				wget http://filez.zoobab.com/allwinner/h2/201609022/android/hardware/broadcom/wlan/bcmdhd/firmware/xr819/$i_xr819.bin -O lib/firmware/$i_xr819.bin
+				wget http://filez.zoobab.com/allwinner/h2/201609022/android/hardware/broadcom/wlan/bcmdhd/firmware/xr819/${i}_xr819.bin -O lib/firmware/${i}_xr819.bin
 			done
 			;;
 		esac
