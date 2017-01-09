@@ -25,6 +25,8 @@ do_fill_image() {
 		echo "FLASHER_SOLUTION=sunxi" >> etc/aosc-arm.conf
 		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk0" >> etc/aosc-arm.conf
 		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk0p1" >> etc/aosc-arm.conf
+		echo "AUTOFLASH_KEY=aosc-os-armel-sunxi-boot" >> etc/aosc-arm.conf
+		echo "AUTOFLASH_CAPABILITIES=\"bootloader kernel\"" >> etc/aosc-arm.conf
 		# The following is for cyanberry-config.
 		touch .rootfs-repartition
 		mkdir -p etc/systemd/system/multi-user.target.wants
