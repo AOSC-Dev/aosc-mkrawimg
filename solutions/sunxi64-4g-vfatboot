@@ -13,7 +13,7 @@ do_fill_image() {
 	pushd p2
 		tar xfpJ "${TARBALL}"
 		mkdir -p usr/lib/modules
-		cp -r usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel/sunxi64/modules/* usr/lib/modules/
+		cp -r usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/modules/* usr/lib/modules/
 		mkdir -p etc/
 		echo "/dev/mmcblk0p2 / ext4 defaults 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
@@ -28,7 +28,7 @@ do_fill_image() {
 		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
 	popd
 	pushd p1
-		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/zImage .
+		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .
 		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
 		cat > boot.cmd << EOF
 fatload mmc 0 40080000 Image
