@@ -26,6 +26,13 @@ do_fill_image() {
 		touch .rootfs-repartition
 		mkdir -p etc/systemd/system/multi-user.target.wants
 		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+		case $DEVICE_NAME in
+		sun50i-a64-pine64*)
+			echo >> etc/NetworkManager/NetworkManager.conf
+			echo "[device]">> etc/NetworkManager/NetworkManager.conf
+			echo "wifi.scan-rand-mac-address=no" >> etc/NetworkManager/NetworkManager.conf
+			;;
+		esac
 	popd
 	pushd p1
 		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .
