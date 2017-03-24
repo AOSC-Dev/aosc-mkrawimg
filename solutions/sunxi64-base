@@ -1,1 +1,49 @@
-sunxi64-4g-vfatboot
+IMAGE_TOTAL_SIZE=3900
+DUAL_PARTITION=1
+FIRST_PARTITION_SIZE=128
+
+FIRST_PARTITION_TYPE=vfat
+SECOND_PARTITION_TYPE=ext4
+
+DEPENDENCIES="uboot-tools wget"
+
+# Note: needs a TARBALL environment variable
+
+do_fill_image() {
+	pushd p2
+		tar xfpJ "${TARBALL}"
+		mkdir -p usr/lib/modules
+		cp -r usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/modules/* usr/lib/modules/
+		mkdir -p etc/
+		echo "/dev/mmcblk0p2 / ext4 defaults 1 1" >> etc/fstab
+		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
+		echo "FLASHER_SOLUTION=sunxi64" >> etc/aosc-arm.conf
+		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk0" >> etc/aosc-arm.conf
+		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk0p1" >> etc/aosc-arm.conf
+		echo "AUTOFLASH_KEY=aosc-os-arm64-sunxi-boot" >> etc/aosc-arm.conf
+		echo "AUTOFLASH_CAPABILITIES=\"bootloader kernel\"" >> etc/aosc-arm.conf
+		# The following is for cyanberry-config.
+		touch .rootfs-repartition
+		mkdir -p etc/systemd/system/multi-user.target.wants
+		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+		case $DEVICE_NAME in
+		sun50i-a64-pine64*)
+			echo >> etc/NetworkManager/NetworkManager.conf
+			echo "[device]">> etc/NetworkManager/NetworkManager.conf
+			echo "wifi.scan-rand-mac-address=no" >> etc/NetworkManager/NetworkManager.conf
+			;;
+		esac
+	popd
+	pushd p1
+		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .
+		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
+		cat > boot.cmd << EOF
+fatload mmc 0 40080000 Image
+fatload mmc 0 4fa00000 dtb.dtb
+setenv bootargs console=ttyS0,115200n8 rw root=/dev/mmcblk0p2 rootwait earlycon=uart,mmio32,0x01c28000
+bootefi 40080000 4fa00000
+EOF
+		mkimage -C none -A arm -T script -d boot.cmd boot.scr
+	popd
+	dd if="p2/usr/lib/aosc-os-arm64-sunxi-boot/u-boot-${DEVICE_NAME}/u-boot-sunxi-with-spl.bin" of="${IMAGE_DEVICE}" bs=1024 seek=8
+}
