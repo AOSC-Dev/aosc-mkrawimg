@@ -1,0 +1,24 @@
+#! /bin/bash
+
+rm -f out/* aux_log/*
+
+sunxi64_devices_list="
+sun50i-a64-pine64-plus
+sun50i-h5-orangepi-pc2
+sun50i-h5-orangepi-prime
+sun50i-h5-nanopi-neo2
+"
+export SOLUTION=sunxi64-base
+# TARBALL environment variable is needed
+for i in $sunxi64_devices_list
+do
+	DEVICE_NAME=$i ./raw-image-builder
+	for j in out/*.img # Uncompressed ones
+	do
+		xz $XZFLAGS $j
+		for k in md5 sha1 sha512
+		do
+			${k}sum $j.xz | awk '{print $1}' > $j.xz.${k}sum
+		done
+	done
+done
