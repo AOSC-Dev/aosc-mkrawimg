@@ -21,7 +21,7 @@ source solutions/"$SOLUTION"
 
 mkdir -p out aux_log
 
-image_name="${DEVICE_NAME}_${SOLUTION}_$(date -u +%F)"
+image_name="${DEVICE_NAME}_${SOLUTION}_$(date -u +%F)${IMAGE_NAME_EXTRA}"
 
 apt-get install ${DEPENDENCIES} -y > aux_log/"${image_name}".log
 
