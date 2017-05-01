@@ -5,17 +5,38 @@ rm -f out/* aux_log/*
 sunxi_devices_list="
 sun4i-a10-cubieboard
 sun7i-a20-cubietruck
+sun7i-a20-bananapi-m1-plus
 
 sun8i-h2-plus-orangepi-zero
 sun8i-h3-orangepi-one
 sun8i-h3-orangepi-plus
 sun8i-h3-nanopi-neo
+sun8i-h3-bananapi-m2-plus
 "
+
+sunxi_devices_list_emmc_mmc2="
+sun8i-h3-orangepi-plus
+sun8i-h3-bananapi-m2-plus
+"
+
 export SOLUTION=sunxi-base
 # TARBALL environment variable is needed
 for i in $sunxi_devices_list
 do
 	DEVICE_NAME=$i ./raw-image-builder
+	for j in out/*.img # Uncompressed ones
+	do
+		xz $XZFLAGS $j
+		for k in md5 sha1 sha512
+		do
+			${k}sum $j.xz | awk '{print $1}' > $j.xz.${k}sum
+		done
+	done
+done
+
+for i in $sunxi_devices_list_emmc_mmc2
+do
+	DEVICE_NAME=$i MMC=2 ./raw-image-builder
 	for j in out/*.img # Uncompressed ones
 	do
 		xz $XZFLAGS $j
