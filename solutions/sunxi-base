@@ -11,6 +11,8 @@ DEPENDENCIES="uboot-tools wget"
 
 if [ ! "$MMC" ]; then
 	MMC=0 # SD Card
+else
+	IMAGE_NAME_EXTRA="_mmc${MMC}"
 fi
 
 do_fill_image() {
