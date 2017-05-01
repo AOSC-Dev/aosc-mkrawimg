@@ -9,6 +9,10 @@ DEPENDENCIES="uboot-tools wget"
 
 # Note: needs a TARBALL environment variable
 
+if [ ! "$MMC" ]; then
+	MMC=0 # SD Card
+fi
+
 do_fill_image() {
 	if [ "$(echo $DEVICE_NAME | cut -c 1-5)" = "sun4i" ] || [ "$(echo $DEVICE_NAME | cut -c 1-5)" = "sun5i" ]; then
 		kernel_variant=nokvm
@@ -20,11 +24,11 @@ do_fill_image() {
 		mkdir -p usr/lib/modules
 		cp -r usr/lib/aosc-os-armel-sunxi-boot/linux-sunxi-${kernel_variant}/modules/* usr/lib/modules/
 		mkdir -p etc/
-		echo "/dev/mmcblk0p2 / ext4 defaults 1 1" >> etc/fstab
+		echo "/dev/mmcblk${MMC}p2 / ext4 defaults 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 		echo "FLASHER_SOLUTION=sunxi" >> etc/aosc-arm.conf
-		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk0" >> etc/aosc-arm.conf
-		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk0p1" >> etc/aosc-arm.conf
+		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk${MMC}" >> etc/aosc-arm.conf
+		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk${MMC}p1" >> etc/aosc-arm.conf
 		echo "AUTOFLASH_KEY=aosc-os-armel-sunxi-boot" >> etc/aosc-arm.conf
 		echo "AUTOFLASH_CAPABILITIES=\"bootloader kernel\"" >> etc/aosc-arm.conf
 		# The following is for cyanberry-config.
@@ -36,6 +40,12 @@ do_fill_image() {
 			# Ampak AP6210
 			mkdir -p lib/firmware/brcm
 			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6210/nvram_ap6210.txt -O lib/firmware/brcm/brcmfmac43362-sdio.txt
+			;;
+		sun8i-h3-bananapi-m2-plus)
+			# Ampak AP6212
+			mkdir -p lib/firmware/brcm
+			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6212/fw_bcm43438a0.bin -O lib/firmware/brcm/brcmfmac43430-sdio.bin
+			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6212/nvram_ap6212.txt -O lib/firmware/brcm/brcmfmac43430-sdio.txt
 			;;
 		sun8i-h2-plus-orangepi-zero)
 			# Allwinner XR819
@@ -51,7 +61,7 @@ do_fill_image() {
 		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/linux-sunxi-${kernel_variant}/zImage .
 		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
 		cat > boot.cmd << EOF
-setenv bootargs console=ttyS0,115200 panic=5 console=ttyUSB0 console=tty0 rootwait root=/dev/mmcblk0p2 earlyprintk rw
+setenv bootargs console=ttyS0,115200 panic=5 console=ttyUSB0 console=tty0 rootwait root=/dev/mmcblk${MMC}p2 earlyprintk rw
 load mmc 0:1 0x43000000 dtb.dtb
 load mmc 0:1 0x42000000 zImage
 bootz 0x42000000 - 0x43000000
