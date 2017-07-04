@@ -7,6 +7,12 @@ SECOND_PARTITION_TYPE=ext4
 
 DEPENDENCIES="uboot-tools wget"
 
+if [ ! "$MMC" ]; then
+	MMC=0 # SD Card
+else
+	IMAGE_NAME_EXTRA="_mmc${MMC}"
+fi
+
 # Note: needs a TARBALL environment variable
 
 do_fill_image() {
@@ -15,11 +21,11 @@ do_fill_image() {
 		mkdir -p usr/lib/modules
 		cp -r usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/modules/* usr/lib/modules/
 		mkdir -p etc/
-		echo "/dev/mmcblk0p2 / ext4 defaults 1 1" >> etc/fstab
+		echo "/dev/mmcblk${MMC}p2 / ext4 defaults 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 		echo "FLASHER_SOLUTION=sunxi64" >> etc/aosc-arm.conf
-		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk0" >> etc/aosc-arm.conf
-		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk0p1" >> etc/aosc-arm.conf
+		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk${MMC}" >> etc/aosc-arm.conf
+		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk${MMC}p1" >> etc/aosc-arm.conf
 		echo "AUTOFLASH_KEY=aosc-os-arm64-sunxi-boot" >> etc/aosc-arm.conf
 		echo "AUTOFLASH_CAPABILITIES=\"bootloader kernel\"" >> etc/aosc-arm.conf
 		# The following is for cyanberry-config.
@@ -40,7 +46,7 @@ do_fill_image() {
 		cat > boot.cmd << EOF
 fatload mmc 0 40080000 Image
 fatload mmc 0 4fa00000 dtb.dtb
-setenv bootargs console=ttyS0,115200n8 rw root=/dev/mmcblk0p2 rootwait earlycon=uart,mmio32,0x01c28000
+setenv bootargs console=ttyS0,115200n8 rw root=/dev/mmcblk${MMC}p2 rootwait earlycon=uart,mmio32,0x01c28000
 bootefi 40080000 4fa00000
 EOF
 		mkimage -C none -A arm -T script -d boot.cmd boot.scr
