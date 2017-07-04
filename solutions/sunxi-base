@@ -48,6 +48,9 @@ do_fill_image() {
 			mkdir -p lib/firmware/brcm
 			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6212/fw_bcm43438a0.bin -O lib/firmware/brcm/brcmfmac43430-sdio.bin
 			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6212/nvram_ap6212.txt -O lib/firmware/brcm/brcmfmac43430-sdio.txt
+
+			# Restrict CPU cores to reduce heat
+			EXTRA_BOOTARGS+=" maxcpus=2"
 			;;
 		sun8i-h2-plus-orangepi-zero)
 			# Allwinner XR819
@@ -63,7 +66,7 @@ do_fill_image() {
 		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/linux-sunxi-${kernel_variant}/zImage .
 		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
 		cat > boot.cmd << EOF
-setenv bootargs console=ttyS0,115200 panic=5 console=ttyUSB0 console=tty0 rootwait root=/dev/mmcblk${MMC}p2 earlyprintk rw
+setenv bootargs console=ttyS0,115200 panic=5 console=ttyUSB0 console=tty0 rootwait root=/dev/mmcblk${MMC}p2 earlyprintk rw${EXTRA_BOOTARGS}
 load mmc 0:1 0x43000000 dtb.dtb
 load mmc 0:1 0x42000000 zImage
 bootz 0x42000000 - 0x43000000
