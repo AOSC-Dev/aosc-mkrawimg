@@ -102,7 +102,9 @@ pushd "$temp_dir"
 		mount "${loop_device}"p3 p3
 	fi
 	do_fill_image
-	umount p1 || umount_fail=1
+	if [ -d p1 ]; then
+		umount p1 || umonut_fail=1
+	fi
 	if [ -d p2 ]; then
 		umount p2 || umonut_fail=1
 	fi
