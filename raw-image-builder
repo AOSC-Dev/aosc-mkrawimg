@@ -28,7 +28,23 @@ apt-get install ${DEPENDENCIES} -y > aux_log/"${image_name}".log
 dd if=/dev/zero of=out/"${image_name}".img bs=1M count="${IMAGE_TOTAL_SIZE}"
 
 fdisk out/"${image_name}".img << EOF
-$(if (("$DUAL_PARTITION")); then
+$(if (("$TRIPLE_PARTITION")); then
+	echo "n"
+	echo "p" # Partition type p-Primary e-Extended
+	echo "1" # Partition number (1-4, default 1)
+	echo # First sector (2048-65535, default 2048)
+	echo "+${FIRST_PARTITION_SIZE}M" # Last sector, +sectors or +size{K,M,G,T,P} (2048-xxxxx, default xxxxx)
+	echo "n"
+	echo "p"
+	echo "2"
+	echo
+	echo "+${SECOND_PARTITION_SIZE}M"
+	echo "n"
+	echo "p"
+	echo "3"
+	echo
+	echo
+elif (("$DUAL_PARTITION")); then
 	echo "n"
 	echo "p" # Partition type p-Primary e-Extended
 	echo "1" # Partition number (1-4, default 1)
@@ -56,9 +72,14 @@ EOF
 loop_device=$(losetup -f)
 losetup -P -v "${loop_device}" out/"${image_name}".img
 
-"mkfs.${FIRST_PARTITION_TYPE}" "${loop_device}"p1
-if (("$DUAL_PARTITION")); then
+if [ "$FIRST_PARTITION_TYPE" ]; then
+	"mkfs.${FIRST_PARTITION_TYPE}" "${loop_device}"p1
+fi
+if [ "$SECOND_PARTITION_TYPE" ]; then
 	"mkfs.${SECOND_PARTITION_TYPE}" "${loop_device}"p2
+fi
+if [ "$THIRD_PARTITION_TYPE" ]; then
+	"mkfs.${THIRD_PARTITION_TYPE}" "${loop_device}"p3
 fi
 
 # This environment variables are passed to do_fill_image
@@ -68,16 +89,25 @@ export IMAGE_DEVICE="${loop_device}"
 temp_dir=$(mktemp -d)
 umonut_fail=0
 pushd "$temp_dir"
-	mkdir p1
-	mount "${loop_device}"p1 p1
-	if (("$DUAL_PARTITION")); then
+	if [ "$FIRST_PARTITION_TYPE" ]; then
+		mkdir p1
+		mount "${loop_device}"p1 p1
+	fi
+	if [ "$SECOND_PARTITION_TYPE" ]; then
 		mkdir p2
 		mount "${loop_device}"p2 p2
+	fi
+	if [ "$THIRD_PARTITION_TYPE" ]; then
+		mkdir p3
+		mount "${loop_device}"p3 p3
 	fi
 	do_fill_image
 	umount p1 || umount_fail=1
 	if [ -d p2 ]; then
 		umount p2 || umonut_fail=1
+	fi
+	if [ -d p3 ]; then
+		umount p3 || umonut_fail=1
 	fi
 popd
 
