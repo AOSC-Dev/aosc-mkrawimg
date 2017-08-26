@@ -10,6 +10,11 @@ THIRD_PARTITION_TYPE=ext4
 
 DEPENDENCIES="uboot-tools wget"
 
+EXTRA_FDISK_COMMANDS="
+a
+2
+"
+
 if [ ! "$MMC" ]; then
 	MMC=1 # SD Card
 else
