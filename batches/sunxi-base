@@ -20,10 +20,15 @@ sun8i-h3-bananapi-m2-plus
 "
 
 export SOLUTION=sunxi-base
-# TARBALL environment variable is needed
+# STUB_TARBALL environment variable is needed
+rm -rf cielfs *.tar.xz
+ciel init "$STUB_TARBALL"
 for i in $sunxi_devices_list
 do
-	DEVICE_NAME=$i ./raw-image-builder
+	DEVICE_NAME=$i ciel generate sunxi-base
+	ciel release sunxi_base_$i 1
+	mv *.tar.xz temp.tar.xz
+	TARBALL=$PWD/temp.tar.xz DEVICE_NAME=$i ./raw-image-builder
 	for j in out/*.img # Uncompressed ones
 	do
 		xz $XZFLAGS $j
@@ -34,15 +39,15 @@ do
 	done
 done
 
-for i in $sunxi_devices_list_emmc_mmc2
-do
-	DEVICE_NAME=$i MMC=2 ./raw-image-builder
-	for j in out/*.img # Uncompressed ones
-	do
-		xz $XZFLAGS $j
-		for k in md5 sha1 sha512
-		do
-			${k}sum $j.xz | awk '{print $1}' > $j.xz.${k}sum
-		done
-	done
-done
+#for i in $sunxi_devices_list_emmc_mmc2
+#do
+#	DEVICE_NAME=$i MMC=2 ./raw-image-builder
+#	for j in out/*.img # Uncompressed ones
+#	do
+#		xz $XZFLAGS $j
+#		for k in md5 sha1 sha512
+#		do
+#			${k}sum $j.xz | awk '{print $1}' > $j.xz.${k}sum
+#		done
+#	done
+#done
