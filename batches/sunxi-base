@@ -20,19 +20,19 @@ sun8i-h3-orangepi-plus
 sun8i-h3-bananapi-m2-plus
 "
 
-export SOLUTION=sunxi-base
-for i in $sunxi_devices_list
-do
-	# STUB_TARBALL environment variable is needed
-	rm -rf cielfs
-	ciel init "$STUB_TARBALL"
-	# Workaround
-	mkdir -p cielfs/50-override/etc/systemd/
-	cat > cielfs/50-override/etc/systemd/resolved.conf << EOF
+# STUB_TARBALL environment variable is needed
+rm -rf cielfs
+ciel init "$STUB_TARBALL"
+# Workaround
+mkdir -p cielfs/50-override/etc/systemd/
+cat > cielfs/50-override/etc/systemd/resolved.conf << EOF
 [Resolve]
 DNS=114.114.114.114
 DNSSEC=no
 EOF
+export SOLUTION=sunxi-base
+for i in $sunxi_devices_list
+do
 	DEVICE_NAME=$i ciel generate sunxi-base
 	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi_base_$i
 	TARBALL=$PWD/temp.tar DEVICE_NAME=$i ./raw-image-builder
