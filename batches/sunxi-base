@@ -23,6 +23,12 @@ export SOLUTION=sunxi-base
 # STUB_TARBALL environment variable is needed
 rm -rf cielfs *.tar.xz
 ciel init "$STUB_TARBALL"
+# Workaround
+cat > cielfs/50-override/etc/systemd/resolved.conf << EOF
+[Resolve]
+DNS=114.114.114.114
+DNSSEC=no
+EOF
 for i in $sunxi_devices_list
 do
 	DEVICE_NAME=$i ciel generate sunxi-base
