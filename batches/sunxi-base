@@ -36,6 +36,7 @@ do
 	ciel release sunxi_base_$i 1
 	mv *.tar.xz temp.tar.xz
 	TARBALL=$PWD/temp.tar.xz DEVICE_NAME=$i ./raw-image-builder
+	rm temp.tar.xz
 	for j in out/*.img # Uncompressed ones
 	do
 		xz $XZFLAGS $j
