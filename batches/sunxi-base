@@ -12,6 +12,7 @@ sun8i-h3-orangepi-one
 sun8i-h3-orangepi-plus
 sun8i-h3-nanopi-neo
 sun8i-h3-bananapi-m2-plus
+sun8i-r40-bananapi-m2-ultra
 "
 
 sunxi_devices_list_emmc_mmc2="
