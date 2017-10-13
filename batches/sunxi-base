@@ -42,7 +42,7 @@ do
 		lz4 $j && rm $j
 		for k in md5 sha1 sha512
 		do
-			${k}sum $j.lz4 | awk '{print $1}' > $j.xz.${k}sum
+			${k}sum $j.lz4 | awk '{print $1}' > $j.lz4.${k}sum
 		done
 	done
 done
