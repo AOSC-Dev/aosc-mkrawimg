@@ -24,6 +24,7 @@ export SOLUTION=sunxi-base
 rm -rf cielfs *.tar.xz
 ciel init "$STUB_TARBALL"
 # Workaround
+mkdir -p cielfs/50-override/etc/systemd/
 cat > cielfs/50-override/etc/systemd/resolved.conf << EOF
 [Resolve]
 DNS=114.114.114.114
