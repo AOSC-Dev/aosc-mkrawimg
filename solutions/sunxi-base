@@ -40,32 +40,6 @@ do_fill_image() {
 		else
 			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/62291c87fb7b6e76c6ee7737b309d9a0659506a8/presets/sunxi -O etc/default/u-boot
 		fi
-		case $DEVICE_NAME in
-		sun7i-a20-cubietruck|sun7i-a20-bananapi-m1-plus|sun6i-a31s-sinovoip-bpi-m2)
-			# Ampak AP6210
-			mkdir -p lib/firmware/brcm
-			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6210/nvram_ap6210.txt -O lib/firmware/brcm/brcmfmac43362-sdio.txt
-			;;
-		sun8i-h3-bananapi-m2-plus)
-			# Ampak AP6212
-			mkdir -p lib/firmware/brcm
-			wget https://github.com/armbian/build/raw/master/bin/firmware-overlay/ap6212/fw_bcm43438a0.bin -O lib/firmware/brcm/brcmfmac43430a0-sdio.bin
-			wget https://github.com/armbian/build/raw/master/bin/firmware-overlay/ap6212/fw_bcm43438a1.bin -O lib/firmware/brcm/brcmfmac43430-sdio.bin
-			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6212/nvram_ap6212.txt -O lib/firmware/brcm/brcmfmac43430a0-sdio.txt
-			wget https://github.com/BPI-SINOVOIP/BPI_WiFi_Firmware/raw/master/ap6212/nvram_ap6212.txt -O lib/firmware/brcm/brcmfmac43430-sdio.txt
-
-			# Restrict CPU cores to reduce heat
-			EXTRA_BOOTARGS+=" maxcpus=2"
-			;;
-		sun8i-h2-plus-orangepi-zero)
-			# Allwinner XR819
-			mkdir -p lib/firmware
-			for i in boot fw sdd
-			do
-				wget http://filez.zoobab.com/allwinner/h2/201609022/android/hardware/broadcom/wlan/bcmdhd/firmware/xr819/${i}_xr819.bin -O lib/firmware/${i}_xr819.bin
-			done
-			;;
-		esac
 	popd
 	pushd p1
 		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/linux-sunxi-${kernel_variant}/zImage .
