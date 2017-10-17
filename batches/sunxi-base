@@ -47,15 +47,18 @@ do
 	done
 done
 
-#for i in $sunxi_devices_list_emmc_mmc2
-#do
-#	DEVICE_NAME=$i MMC=2 ./raw-image-builder
-#	for j in out/*.img # Uncompressed ones
-#	do
-#		xz $XZFLAGS $j
-#		for k in md5 sha1 sha512
-#		do
-#			${k}sum $j.xz | awk '{print $1}' > $j.xz.${k}sum
-#		done
-#	done
-#done
+for i in $sunxi_devices_list_emmc_mmc2
+do
+	DEVICE_NAME=$i ciel generate sunxi-base
+	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi_base_$i
+	TARBALL=$PWD/temp.tar DEVICE_NAME=$i MMC=2 ./raw-image-builder
+	rm temp.tar*
+	for j in out/*.img # Uncompressed ones
+	do
+		lz4 $j && rm $j
+		for k in md5 sha1 sha512
+		do
+			${k}sum $j.lz4 | awk '{print $1}' > $j.lz4.${k}sum
+		done
+	done
+done
