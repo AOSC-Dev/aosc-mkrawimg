@@ -39,7 +39,7 @@ do
 	rm temp.tar*
 	for j in out/*.img # Uncompressed ones
 	do
-		lz4 $j && rm $j
+		lz4 < $j > $j.lz4 && rm $j
 		for k in md5 sha1 sha512
 		do
 			${k}sum $j.lz4 | awk '{print $1}' > $j.lz4.${k}sum
@@ -55,7 +55,7 @@ do
 	rm temp.tar*
 	for j in out/*.img # Uncompressed ones
 	do
-		lz4 $j && rm $j
+		lz4 < $j > $j.lz4 && rm $j
 		for k in md5 sha1 sha512
 		do
 			${k}sum $j.lz4 | awk '{print $1}' > $j.lz4.${k}sum
