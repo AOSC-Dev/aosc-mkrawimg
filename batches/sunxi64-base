@@ -47,8 +47,8 @@ done
 
 for i in $sunxi64_devices_list_emmc_mmc2
 do
-	DEVICE_NAME=$i ciel generate sunxi-base
-	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi_base_$i
+	DEVICE_NAME=$i ciel generate sunxi64-base
+	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_base_$i
 	TARBALL=$PWD/temp.tar DEVICE_NAME=$i MMC=2 ./raw-image-builder
 	rm temp.tar*
 	for j in out/*.img # Uncompressed ones
