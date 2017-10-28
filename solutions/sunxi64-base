@@ -31,9 +31,9 @@ do_fill_image() {
 		# For u-boot-aosc-utils
 		mkdir -p etc/default
 		if [ "$MMC" = "2" ]; then
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/62291c87fb7b6e76c6ee7737b309d9a0659506a8/presets/sunxi-mmc2 -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/e630f26ed2e1f753b5faed0f9e70bc349a7aae27/presets/sunxi64-mmc2 -O etc/default/u-boot
 		else
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/62291c87fb7b6e76c6ee7737b309d9a0659506a8/presets/sunxi -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/e630f26ed2e1f753b5faed0f9e70bc349a7aae27/presets/sunxi64 -O etc/default/u-boot
 		fi
 		case $DEVICE_NAME in
 		sun50i-a64-pine64*)
