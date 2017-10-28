@@ -17,7 +17,7 @@ fi
 
 do_fill_image() {
 	pushd p2
-		tar xfpJ "${TARBALL}"
+		tar xfpa "${TARBALL}"
 		mkdir -p etc/
 		echo "/dev/mmcblk${MMC}p2 / ext4 defaults 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
