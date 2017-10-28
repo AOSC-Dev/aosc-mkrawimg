@@ -14,30 +14,29 @@ sunxi64_devices_list_emmc_mmc2="
 sun50i-a64-bananapi-m64
 "
 
+# STUB_TARBALL environment variable is needed
+rm -rf cielfs
+ciel init "$STUB_TARBALL"
+# Workaround
+mkdir -p cielfs/50-override/etc/systemd/
+cat > cielfs/50-override/etc/systemd/resolved.conf << EOF
+[Resolve]
+DNS=114.114.114.114
+DNSSEC=no
+EOF
 export SOLUTION=sunxi64-base
-# TARBALL environment variable is needed
 for i in $sunxi64_devices_list
 do
-	DEVICE_NAME=$i ./raw-image-builder
+	DEVICE_NAME=$i ciel generate sunxi64-base
+	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_base_$i
+	TARBALL=$PWD/temp.tar DEVICE_NAME=$i ./raw-image-builder
+	rm temp.tar*
 	for j in out/*.img # Uncompressed ones
 	do
-		xz $XZFLAGS $j
+		lz4 < $j > $j.lz4 && rm $j
 		for k in md5 sha1 sha512
 		do
-			${k}sum $j.xz | awk '{print $1}' > $j.xz.${k}sum
-		done
-	done
-done
-
-for i in $sunxi64_devices_list_emmc_mmc2
-do
-	DEVICE_NAME=$i MMC=2 ./raw-image-builder
-	for j in out/*.img # Uncompressed ones
-	do
-		xz $XZFLAGS $j
-		for k in md5 sha1 sha512
-		do
-			${k}sum $j.xz | awk '{print $1}' > $j.xz.${k}sum
+			${k}sum $j.lz4 | awk '{print $1}' > $j.lz4.${k}sum
 		done
 	done
 done
