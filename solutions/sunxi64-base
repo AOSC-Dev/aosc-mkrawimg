@@ -50,7 +50,7 @@ do_fill_image() {
 fatload mmc 0 40080000 Image
 fatload mmc 0 4fa00000 dtb.dtb
 setenv bootargs console=ttyS0,115200n8 rw root=/dev/mmcblk${MMC}p2 rootwait earlycon=uart,mmio32,0x01c28000
-bootefi 40080000 4fa00000
+booti 40080000 - 4fa00000
 EOF
 		mkimage -C none -A arm -T script -d boot.cmd boot.scr
 	popd
