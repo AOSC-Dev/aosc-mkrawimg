@@ -18,20 +18,23 @@ fi
 do_fill_image() {
 	pushd p2
 		tar xfpJ "${TARBALL}"
-		mkdir -p usr/lib/modules
-		cp -r usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/modules/* usr/lib/modules/
 		mkdir -p etc/
 		echo "/dev/mmcblk${MMC}p2 / ext4 defaults 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 		echo "FLASHER_SOLUTION=sunxi64" >> etc/aosc-arm.conf
 		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk${MMC}" >> etc/aosc-arm.conf
 		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk${MMC}p1" >> etc/aosc-arm.conf
-		echo "AUTOFLASH_KEY=aosc-os-arm64-sunxi-boot" >> etc/aosc-arm.conf
-		echo "AUTOFLASH_CAPABILITIES=\"bootloader kernel\"" >> etc/aosc-arm.conf
 		# The following is for cyanberry-config.
 		touch .rootfs-repartition
 		mkdir -p etc/systemd/system/multi-user.target.wants
 		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+		# For u-boot-aosc-utils
+		mkdir -p etc/default
+		if [ "$MMC" = "2" ]; then
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/62291c87fb7b6e76c6ee7737b309d9a0659506a8/presets/sunxi-mmc2 -O etc/default/u-boot
+		else
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/62291c87fb7b6e76c6ee7737b309d9a0659506a8/presets/sunxi -O etc/default/u-boot
+		fi
 		case $DEVICE_NAME in
 		sun50i-a64-pine64*)
 			echo >> etc/NetworkManager/NetworkManager.conf
