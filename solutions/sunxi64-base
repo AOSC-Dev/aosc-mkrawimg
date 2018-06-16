@@ -31,9 +31,9 @@ do_fill_image() {
 		# For u-boot-aosc-utils
 		mkdir -p etc/default
 		if [ "$MMC" = "2" ]; then
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/e630f26ed2e1f753b5faed0f9e70bc349a7aae27/presets/sunxi64-mmc2 -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/a8be97782ef56ded95f2f51a145f070aab457e2c/presets/sunxi64-mmc2 -O etc/default/u-boot
 		else
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/e630f26ed2e1f753b5faed0f9e70bc349a7aae27/presets/sunxi64 -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/a8be97782ef56ded95f2f51a145f070aab457e2c/presets/sunxi64 -O etc/default/u-boot
 		fi
 		case $DEVICE_NAME in
 		sun50i-a64-pine64*)
@@ -47,8 +47,8 @@ do_fill_image() {
 		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .
 		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
 		cat > boot.cmd << EOF
-fatload mmc 0 40080000 Image
-fatload mmc 0 4fa00000 dtb.dtb
+load mmc \${mmc_bootdev}:1 40080000 Image
+load mmc \${mmc_bootdev}:1 4fa00000 dtb.dtb
 setenv bootargs console=ttyS0,115200n8 console=tty0 rw root=/dev/mmcblk${MMC}p2 rootwait earlycon=uart,mmio32,0x01c28000
 booti 40080000 - 4fa00000
 EOF
