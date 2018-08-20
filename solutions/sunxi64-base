@@ -13,6 +13,19 @@ else
 	IMAGE_NAME_EXTRA="_mmc${MMC}"
 fi
 
+case "$DEVICE_NAME" in
+sun50i-h6*)
+	DEBUG_UART=0x05000000
+	;;
+sun50i-a64*|sun50i-h5*)
+	DEBUG_UART=0x01c28000
+	;;
+*)
+	echo "Wrong DEVICE_NAME: $DEVICE_NAME"
+	exit 1
+	;;
+esac
+
 # Note: needs a TARBALL environment variable
 
 do_fill_image() {
@@ -49,7 +62,7 @@ do_fill_image() {
 		cat > boot.cmd << EOF
 load mmc \${mmc_bootdev}:1 40080000 Image
 load mmc \${mmc_bootdev}:1 4fa00000 dtb.dtb
-setenv bootargs console=ttyS0,115200n8 console=tty0 rw root=/dev/mmcblk${MMC}p2 rootwait earlycon=uart,mmio32,0x01c28000
+setenv bootargs console=ttyS0,115200n8 console=tty0 rw root=/dev/mmcblk${MMC}p2 rootwait earlycon=uart,mmio32,${DEBUG_UART}
 booti 40080000 - 4fa00000
 EOF
 		mkimage -C none -A arm -T script -d boot.cmd boot.scr
