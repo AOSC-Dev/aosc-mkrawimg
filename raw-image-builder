@@ -91,15 +91,27 @@ umonut_fail=0
 pushd "$temp_dir"
 	if [ "$FIRST_PARTITION_TYPE" ]; then
 		mkdir p1
-		mount "${loop_device}"p1 p1
+		if [ "$FIRST_PARTITION_MOUNT_OPTIONS" ]; then
+			mount -o "$FIRST_PARTITION_MOUNT_OPTIONS" "${loop_device}"p1 p1
+		else
+			mount "${loop_device}"p1 p1
+		fi
 	fi
 	if [ "$SECOND_PARTITION_TYPE" ]; then
 		mkdir p2
-		mount "${loop_device}"p2 p2
+		if [ "$SECOND_PARTITION_MOUNT_OPTIONS" ]; then
+			mount -o "$SECOND_PARTITION_MOUNT_OPTIONS" "${loop_device}"p2 p2
+		else
+			mount "${loop_device}"p2 p2
+		fi
 	fi
 	if [ "$THIRD_PARTITION_TYPE" ]; then
 		mkdir p3
-		mount "${loop_device}"p3 p3
+		if [ "$THIRD_PARTITION_MOUNT_OPTIONS" ]; then
+			mount -o "$THIRD_PARTITION_MOUNT_OPTIONS" "${loop_device}"p3 p3
+		else
+			mount "${loop_device}"p3 p3
+		fi
 	fi
 	do_fill_image
 	if [ -d p1 ]; then
