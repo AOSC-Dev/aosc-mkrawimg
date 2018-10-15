@@ -1,0 +1,72 @@
+IMAGE_TOTAL_SIZE=7400
+DUAL_PARTITION=1
+FIRST_PARTITION_SIZE=128
+
+FIRST_PARTITION_TYPE=vfat
+SECOND_PARTITION_TYPE=btrfs
+SECOND_PARTITION_MOUNT_OPTIONS="compress=zstd"
+
+DEPENDENCIES="uboot-tools wget"
+
+if [ ! "$MMC" ]; then
+	MMC=0 # SD Card
+else
+	IMAGE_NAME_EXTRA="_mmc${MMC}"
+fi
+
+case "$DEVICE_NAME" in
+sun50i-h6*)
+	DEBUG_UART=0x05000000
+	;;
+sun50i-a64*|sun50i-h5*)
+	DEBUG_UART=0x01c28000
+	;;
+*)
+	echo "Wrong DEVICE_NAME: $DEVICE_NAME"
+	exit 1
+	;;
+esac
+
+# Note: needs a TARBALL environment variable
+
+do_fill_image() {
+	pushd p2
+		tar xfpa "${TARBALL}"
+		mkdir -p etc/
+		echo "/dev/mmcblk${MMC}p2 / btrfs compress=zstd,ssd 1 1" >> etc/fstab
+		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
+		echo "FLASHER_SOLUTION=sunxi64" >> etc/aosc-arm.conf
+		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk${MMC}" >> etc/aosc-arm.conf
+		echo "SUNXI_KERNEL_DEVICE=/dev/mmcblk${MMC}p1" >> etc/aosc-arm.conf
+		# The following is for cyanberry-config.
+		touch .rootfs-repartition
+		mkdir -p etc/systemd/system/multi-user.target.wants
+		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+		# For u-boot-aosc-utils
+		mkdir -p etc/default
+		if [ "$MMC" = "2" ]; then
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/a8be97782ef56ded95f2f51a145f070aab457e2c/presets/sunxi64-mmc2 -O etc/default/u-boot
+		else
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/a8be97782ef56ded95f2f51a145f070aab457e2c/presets/sunxi64 -O etc/default/u-boot
+		fi
+		case $DEVICE_NAME in
+		sun50i-a64-pine64*)
+			echo >> etc/NetworkManager/NetworkManager.conf
+			echo "[device]">> etc/NetworkManager/NetworkManager.conf
+			echo "wifi.scan-rand-mac-address=no" >> etc/NetworkManager/NetworkManager.conf
+			;;
+		esac
+	popd
+	pushd p1
+		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .
+		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
+		cat > boot.cmd << EOF
+load mmc \${mmc_bootdev}:1 40080000 Image
+load mmc \${mmc_bootdev}:1 4fa00000 dtb.dtb
+setenv bootargs console=ttyS0,115200n8 console=tty0 rw root=/dev/mmcblk${MMC}p2 rootwait earlycon=uart,mmio32,${DEBUG_UART}
+booti 40080000 - 4fa00000
+EOF
+		mkimage -C none -A arm -T script -d boot.cmd boot.scr
+	popd
+	dd if="p2/usr/lib/aosc-os-arm64-sunxi-boot/u-boot-${DEVICE_NAME}/u-boot-sunxi-with-spl.bin" of="${IMAGE_DEVICE}" bs=1024 seek=8
+}
