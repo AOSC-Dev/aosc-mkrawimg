@@ -3,7 +3,8 @@ DUAL_PARTITION=1
 FIRST_PARTITION_SIZE=128
 
 FIRST_PARTITION_TYPE=vfat
-SECOND_PARTITION_TYPE=ext4
+SECOND_PARTITION_TYPE=btrfs
+SECOND_PARTITION_MOUNT_OPTIONS="compress=zstd"
 
 DEPENDENCIES="uboot-tools wget"
 
@@ -24,7 +25,7 @@ do_fill_image() {
 	pushd p2
 		tar xfpa "${TARBALL}"
 		mkdir -p etc/
-		echo "/dev/mmcblk${MMC}p2 / ext4 defaults 1 1" >> etc/fstab
+		echo "/dev/mmcblk${MMC}p2 / btrfs compress=zstd,ssd 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 		echo "FLASHER_SOLUTION=sunxi" >> etc/aosc-arm.conf
 		echo "SUNXI_FIRMWARE_DEVICE=/dev/mmcblk${MMC}" >> etc/aosc-arm.conf
