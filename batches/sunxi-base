@@ -7,7 +7,9 @@ sun4i-a10-cubieboard
 sun7i-a20-cubietruck
 sun7i-a20-bananapi-m1-plus
 
+sun8i-h2-plus-bananapi-m2-zero
 sun8i-h2-plus-orangepi-zero
+sun8i-h3-libretech-all-h3-cc
 sun8i-h3-orangepi-one
 sun8i-h3-orangepi-plus
 sun8i-h3-nanopi-neo
@@ -16,6 +18,7 @@ sun8i-r40-bananapi-m2-ultra
 "
 
 sunxi_devices_list_emmc_mmc2="
+sun8i-h3-libretech-all-h3-cc
 sun8i-h3-orangepi-plus
 sun8i-h3-bananapi-m2-plus
 sun8i-r40-bananapi-m2-ultra
