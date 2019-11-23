@@ -27,6 +27,11 @@ apt-get install ${DEPENDENCIES} -y > aux_log/"${image_name}".log
 
 dd if=/dev/zero of=out/"${image_name}".img bs=1M count="${IMAGE_TOTAL_SIZE}"
 
+if [ "$GDISK_COMMANDS" ]; then
+gdisk out/"${image_name}".img << EOF
+${GDISK_COMMANDS}
+EOF
+else
 fdisk out/"${image_name}".img << EOF
 $(if (("$TRIPLE_PARTITION")); then
 	echo "n"
@@ -68,6 +73,7 @@ ${EXTRA_FDISK_COMMANDS}
 
 w
 EOF
+fi
 
 loop_device=$(losetup -f)
 losetup -P -v "${loop_device}" out/"${image_name}".img
@@ -81,6 +87,10 @@ fi
 if [ "$THIRD_PARTITION_TYPE" ]; then
 	"mkfs.${THIRD_PARTITION_TYPE}" "${loop_device}"p3
 fi
+if [ "$FOURTH_PARTITION_TYPE" ]; then
+	"mkfs.${FOURTH_PARTITION_TYPE}" "${loop_device}"p4
+fi
+
 
 # This environment variables are passed to do_fill_image
 export IMAGE="$(readlink -e out/${image_name}.img)"
@@ -113,6 +123,14 @@ pushd "$temp_dir"
 			mount "${loop_device}"p3 p3
 		fi
 	fi
+	if [ "$FOURTH_PARTITION_TYPE" ]; then
+		mkdir p4
+		if [ "$FOURTH_PARTITION_MOUNT_OPTIONS" ]; then
+			mount -o "$FOURTH_PARTITION_MOUNT_OPTIONS" "${loop_device}"p4 p4
+		else
+			mount "${loop_device}"p4 p4
+		fi
+	fi
 	do_fill_image
 	if [ -d p1 ]; then
 		umount p1 || umonut_fail=1
@@ -122,6 +140,9 @@ pushd "$temp_dir"
 	fi
 	if [ -d p3 ]; then
 		umount p3 || umonut_fail=1
+	fi
+	if [ -d p4 ]; then
+		umount p4 || umonut_fail=1
 	fi
 popd
 
