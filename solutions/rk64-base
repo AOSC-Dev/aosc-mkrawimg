@@ -1,0 +1,86 @@
+IMAGE_TOTAL_SIZE=3900
+
+THIRD_PARTITION_TYPE=vfat
+FOURTH_PARTITION_TYPE=btrfs
+FOURTH_PARTITION_MOUNT_OPTIONS="compress=zstd"
+
+DEPENDENCIES="uboot-tools wget gptfdisk"
+
+GDISK_COMMANDS="
+x
+l
+64
+m
+n
+1
+64
+16383
+8301
+n
+2
+16384
+32767
+8301
+n
+3
+32768
+262143
+ef00
+n
+4
+262144
+
+8305
+w
+y
+"
+
+if [ ! "$MMC" ] || [ "$MMC" = "0" ]; then
+	MMC=0 # SD Card
+	UBOOT_MMC=1
+	IMAGE_NAME_EXTRA="_sd"
+else if [ "$MMC" = "1"  ]; then
+	UBOOT_MMC=0
+	IMAGE_NAME_EXTRA="_emmc"
+else
+	echo "Wrong MMC variable"
+	exit 1
+fi
+
+# Note: needs a TARBALL environment variable
+
+do_fill_image() {
+	pushd p4
+		tar xfpJ "${TARBALL}"
+		mkdir -p etc/
+		echo "/dev/mmcblk${MMC}p3 / btrfs compress=zstd,ssd 1 1" >> etc/fstab
+		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
+		echo "FLASHER_SOLUTION=rockchip" >> etc/aosc-arm.conf
+		echo "RK_FIRMWARE_DEVICE=/dev/mmcblk${MMC}" >> etc/aosc-arm.conf
+		echo "RK_KERNEL_DEVICE=/dev/mmcblk${MMC}p3" >> etc/aosc-arm.conf
+		# The following is for cyanberry-config.
+		touch .rootfs-repartition
+		mkdir -p etc/systemd/system/multi-user.target.wants
+		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+		# For u-boot-aosc-utils
+		mkdir -p etc/default
+		if [ "$MMC" = "1" ]; then
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/121a9f11cd77c7c75a7ae0792e9b391e11a65fa7/presets/rk64-emmc -O etc/default/u-boot
+		else
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/121a9f11cd77c7c75a7ae0792e9b391e11a65fa7/presets/rk64-sd -O etc/default/u-boot
+		fi
+	popd
+	pushd p3
+		cp ../p4/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .
+		cp ../p4/usr/lib/aosc-os-arm64-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
+		cat > boot.cmd << EOF
+load mmc ${UBOOT_MMC}:1 0x02080000 Image
+load mmc ${UBOOT_MMC}:1 0x01f00000 dtb.dtb
+setenv bootargs console=ttyS2,1500000 console=tty0 root=/dev/mmcblk${MMC}p4 rootwait earlyprintk panic=10
+booti 0x02080000 - 0x01f00000
+EOF
+		mkimage -C none -A arm -T script -d boot.cmd boot.scr
+	popd
+	dd if=p4/usr/lib/aosc-os-arm64-rockchip-boot/u-boot-${DEVICE_NAME}/idbloader.img of="${IMAGE_DEVICE}" bs=512 seek=64
+	dd if=p4/usr/lib/aosc-os-arm64-rockchip-boot/u-boot-${DEVICE_NAME}/u-boot.itb of="${IMAGE_DEVICE}" bs=512 seek=16384
+}
