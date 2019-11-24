@@ -74,8 +74,8 @@ do_fill_image() {
 		cp ../p4/usr/lib/aosc-os-arm64-rockchip-boot/linux-kernel-rk64/Image .
 		cp ../p4/usr/lib/aosc-os-arm64-rockchip-boot/dtb-${DEVICE_NAME}/dtb.dtb .
 		cat > boot.cmd << EOF
-load mmc ${UBOOT_MMC}:1 0x02080000 Image
-load mmc ${UBOOT_MMC}:1 0x01f00000 dtb.dtb
+load mmc ${UBOOT_MMC}:3 0x02080000 Image
+load mmc ${UBOOT_MMC}:3 0x01f00000 dtb.dtb
 setenv bootargs console=ttyS2,1500000 console=tty0 root=/dev/mmcblk${MMC}p4 rootwait earlyprintk panic=10
 booti 0x02080000 - 0x01f00000
 EOF
