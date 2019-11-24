@@ -39,7 +39,7 @@ if [ ! "$MMC" ] || [ "$MMC" = "0" ]; then
 	MMC=0 # SD Card
 	UBOOT_MMC=1
 	IMAGE_NAME_EXTRA="_sd"
-else if [ "$MMC" = "1"  ]; then
+elif [ "$MMC" = "1" ]; then
 	UBOOT_MMC=0
 	IMAGE_NAME_EXTRA="_emmc"
 else
