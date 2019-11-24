@@ -71,8 +71,8 @@ do_fill_image() {
 		fi
 	popd
 	pushd p3
-		cp ../p4/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .
-		cp ../p4/usr/lib/aosc-os-arm64-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
+		cp ../p4/usr/lib/aosc-os-arm64-rockchip-boot/linux-kernel-rk64/Image .
+		cp ../p4/usr/lib/aosc-os-arm64-rockchip-boot/dtb-${DEVICE_NAME}/dtb.dtb .
 		cat > boot.cmd << EOF
 load mmc ${UBOOT_MMC}:1 0x02080000 Image
 load mmc ${UBOOT_MMC}:1 0x01f00000 dtb.dtb
