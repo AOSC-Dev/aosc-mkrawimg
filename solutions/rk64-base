@@ -51,7 +51,7 @@ fi
 
 do_fill_image() {
 	pushd p4
-		tar xfpJ "${TARBALL}"
+		tar xfpa "${TARBALL}"
 		mkdir -p etc/
 		echo "/dev/mmcblk${MMC}p3 / btrfs compress=zstd,ssd 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
