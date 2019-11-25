@@ -8,10 +8,14 @@ SECOND_PARTITION_MOUNT_OPTIONS="compress=zstd"
 
 DEPENDENCIES="uboot-tools wget"
 
-if [ ! "$MMC" ]; then
+if [ ! "$MMC" ] || [ "$MMC" = "0" ]; then
 	MMC=0 # SD Card
+	IMAGE_NAME_EXTRA="_sd"
+elif [ "$MMC" = "2" ]; then
+	IMAGE_NAME_EXTRA="_emmc"
 else
-	IMAGE_NAME_EXTRA="_mmc${MMC}"
+	echo "Wrong MMC variable"
+	exit 1
 fi
 
 case "$DEVICE_NAME" in
