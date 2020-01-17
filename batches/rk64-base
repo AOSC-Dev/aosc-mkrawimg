@@ -5,11 +5,13 @@ rm -f out/* aux_log/*
 rk64_devices_list="
 rk3328-rock64
 rk3399-rockpro64
+rk3399-pinebook-pro
 "
 
 rk64_devices_list_emmc="
 rk3328-rock64
 rk3399-rockpro64
+rk3399-pinebook-pro
 "
 
 export SOLUTION=rk64-base
