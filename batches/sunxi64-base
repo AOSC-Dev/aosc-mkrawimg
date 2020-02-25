@@ -42,7 +42,13 @@ do
 DNS=114.114.114.114
 DNSSEC=no
 EOF
+	if [ "$MIRROR" ]; then
+		ciel switchmirror "$MIRROR"
+	fi
 	DEVICE_NAME=$i ciel generate sunxi64-base
+	if [ "$MIRROR" ]; then
+		ciel switchmirror origin
+	fi
 	ciel down
 	cp resolved.conf.backup .ciel/container/dist/etc/systemd/resolved.conf 
 	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_base_$i
