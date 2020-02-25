@@ -132,6 +132,7 @@ pushd "$temp_dir"
 		fi
 	fi
 	do_fill_image
+	sync && sleep 10
 	if [ -d p1 ]; then
 		umount p1 || umonut_fail=1
 	fi
