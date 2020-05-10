@@ -51,8 +51,8 @@ do_fill_image() {
 		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/dtb-${DEVICE_NAME}/dtb.dtb .
 		cat > boot.cmd << EOF
 setenv bootargs console=ttyS0,115200 panic=5 console=ttyUSB0 console=tty0 rootwait root=/dev/mmcblk${MMC}p2 earlyprintk rw${EXTRA_BOOTARGS}
-load mmc 0:1 0x43000000 dtb.dtb
-load mmc 0:1 0x42000000 zImage
+load mmc \${mmc_bootdev}:1 0x43000000 dtb.dtb
+load mmc \${mmc_bootdev}:1 0x42000000 zImage
 bootz 0x42000000 - 0x43000000
 EOF
 		mkimage -C none -A arm -T script -d boot.cmd boot.scr
