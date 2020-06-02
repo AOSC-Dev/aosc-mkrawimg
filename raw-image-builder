@@ -15,7 +15,7 @@ function mount_partition () {
 function cleanup () {
 	echo 'Performing cleanup...'
 	cd "$temp_dir" || exit 1
-	for i in "p1 p2 p3 p4"; do
+	for i in 'p1' 'p2' 'p3' 'p4'; do
 		[ -d "$i" ] && umount "$i" || umount_fail=1
 	done
 	if ! ((umount_fail)); then
