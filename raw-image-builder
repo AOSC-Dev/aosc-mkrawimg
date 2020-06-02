@@ -55,15 +55,15 @@ apt-get install ${DEPENDENCIES} -y > aux_log/"${image_name}".log
 dd if=/dev/zero of=out/"${image_name}".img bs=1M count="${IMAGE_TOTAL_SIZE}"
 
 if [ "$(type -t "GDISK_COMMANDS")" = "function" ]; then
-    GDISK_COMMANDS "out/${image_name}.img"
+	GDISK_COMMANDS "out/${image_name}.img"
 else
-    PLAN="label:dos\nstart=2048"
-    # 2 partitions or more
+	PLAN="label:dos\nstart=2048"
+	# 2 partitions or more
 	if [ $(("$TRIPLE_PARTITION" + "$DUAL_PARTITION")) -ge 0 ]; then
 		# append size constraint to the first partition
 		PLAN+=",size=+${FIRST_PARTITION_SIZE}M"
 	fi
-    # 3 partitions
+	# 3 partitions
 	if (("$TRIPLE_PARTITION")); then
 		# append size constraint to the second partition
 		PLAN+="\nsize=+${SECOND_PARTITION_SIZE}M"
@@ -71,10 +71,10 @@ else
 	# This `type=83` is actually a workaround for sfdisk to create a partition that is
 	# extended to the end of the disk since we don't know the start or size of the partition
 	PLAN+="\ntype=83\nwrite\n"
-    echo -e "$PLAN" | sfdisk /tmp/test.img
-    if [ "$(type -t "EXTRA_FDISK_COMMANDS")" = "function" ]; then
-        EXTRA_FDISK_COMMANDS "out/${image_name}.img"
-    fi
+	echo -e "$PLAN" | sfdisk /tmp/test.img
+	if [ "$(type -t "EXTRA_FDISK_COMMANDS")" = "function" ]; then
+		EXTRA_FDISK_COMMANDS "out/${image_name}.img"
+	fi
 fi
 
 loop_device=$(losetup -f)
