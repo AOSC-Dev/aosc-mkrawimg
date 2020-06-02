@@ -1,5 +1,32 @@
 #! /bin/bash -e
 
+# $1: partition number, $2: partition type, $3: partition mount options
+function mount_partition () {
+	if [ "$2" ]; then
+		mkdir "$1"
+		if [ "$3" ]; then
+			mount -o "$3" "${loop_device}$1" "$1"
+		else
+			mount "${loop_device}$1" "$1"
+		fi
+	fi
+}
+
+function cleanup () {
+	echo 'Performing cleanup...'
+	cd "$temp_dir" || exit 1
+	for i in "p1 p2 p3 p4"; do
+		[ -d "$i" ] && umount "$i" || umount_fail=1
+	done
+	if ! ((umount_fail)); then
+		rm -r "${temp_dir}"
+	else
+		echo "WARNING: umount failed" >&2
+	fi
+
+	losetup -d "$loop_device"
+}
+
 if [ ! "$SOLUTION" ]; then
 	echo "Solution unspecified!" >&2
 	echo "Please set the SOLUTION environment variable!" >&2
@@ -75,58 +102,12 @@ export IMAGE_DEVICE="${loop_device}"
 temp_dir=$(mktemp -d)
 umount_fail=0
 pushd "$temp_dir"
-	if [ "$FIRST_PARTITION_TYPE" ]; then
-		mkdir p1
-		if [ "$FIRST_PARTITION_MOUNT_OPTIONS" ]; then
-			mount -o "$FIRST_PARTITION_MOUNT_OPTIONS" "${loop_device}"p1 p1
-		else
-			mount "${loop_device}"p1 p1
-		fi
-	fi
-	if [ "$SECOND_PARTITION_TYPE" ]; then
-		mkdir p2
-		if [ "$SECOND_PARTITION_MOUNT_OPTIONS" ]; then
-			mount -o "$SECOND_PARTITION_MOUNT_OPTIONS" "${loop_device}"p2 p2
-		else
-			mount "${loop_device}"p2 p2
-		fi
-	fi
-	if [ "$THIRD_PARTITION_TYPE" ]; then
-		mkdir p3
-		if [ "$THIRD_PARTITION_MOUNT_OPTIONS" ]; then
-			mount -o "$THIRD_PARTITION_MOUNT_OPTIONS" "${loop_device}"p3 p3
-		else
-			mount "${loop_device}"p3 p3
-		fi
-	fi
-	if [ "$FOURTH_PARTITION_TYPE" ]; then
-		mkdir p4
-		if [ "$FOURTH_PARTITION_MOUNT_OPTIONS" ]; then
-			mount -o "$FOURTH_PARTITION_MOUNT_OPTIONS" "${loop_device}"p4 p4
-		else
-			mount "${loop_device}"p4 p4
-		fi
-	fi
+	trap 'echo "WARNING: Interrupt signal received!"; cleanup' SIGHUP SIGINT SIGQUIT SIGTERM
+	trap 'cleanup' EXIT
+	mount_partition "p1" "$FIRST_PARTITION_TYPE"  "$FIRST_PARTITION_MOUNT_OPTIONS"
+	mount_partition "p2" "$SECOND_PARTITION_TYPE" "$SECOND_PARTITION_MOUNT_OPTIONS"
+	mount_partition "p3" "$THIRD_PARTITION_TYPE"  "$THIRD_PARTITION_MOUNT_OPTIONS"
+	mount_partition "p4" "$FOURTH_PARTITION_TYPE" "$FOURTH_PARTITION_MOUNT_OPTIONS"
 	do_fill_image
 	sync && sleep 10
-	if [ -d p1 ]; then
-		umount p1 || umount_fail=1
-	fi
-	if [ -d p2 ]; then
-		umount p2 || umount_fail=1
-	fi
-	if [ -d p3 ]; then
-		umount p3 || umount_fail=1
-	fi
-	if [ -d p4 ]; then
-		umount p4 || umount_fail=1
-	fi
 popd
-
-if ! ((umount_fail)); then
-	rm -r "${temp_dir}"
-else
-	echo "WARNING: umount failed" >&2
-fi
-
-losetup -d "$loop_device"
