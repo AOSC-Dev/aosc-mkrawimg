@@ -31,13 +31,13 @@ EOF
 	if [ "$MIRROR" ]; then
 		ciel switchmirror "$MIRROR"
 	fi
-	DEVICE_NAME=$i ciel generate sunxi64-gnome
+	DEVICE_NAME=$i ciel generate sunxi64-cinnamon
 	if [ "$MIRROR" ]; then
 		ciel switchmirror origin
 	fi
 	ciel down
 	cp resolved.conf.backup .ciel/container/dist/etc/systemd/resolved.conf 
-	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_gnome_$i
+	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_cinnamon_$i
 	TARBALL=$PWD/temp.tar DEVICE_NAME=$i ./raw-image-builder
 	if echo "$sunxi64_devices_list_emmc_mmc2" | grep "^$i\$"; then
 		TARBALL=$PWD/temp.tar DEVICE_NAME=$i MMC=2 ./raw-image-builder

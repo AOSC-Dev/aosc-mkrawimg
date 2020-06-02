@@ -3,15 +3,29 @@
 rm -f out/* aux_log/*
 
 sunxi64_devices_list="
+sun50i-a64-pine64-plus
 sun50i-a64-pinebook
 sun50i-a64-pinetab
+sun50i-a64-pinephone
+sun50i-a64-bananapi-m64
+sun50i-a64-sopine-baseboard
 sun50i-a64-teres-i
+sun50i-h5-libretech-all-h3-cc
+sun50i-h5-orangepi-pc2
+sun50i-h5-orangepi-prime
+sun50i-h5-nanopi-neo2
+sun50i-h6-pine-h64
 "
 
 sunxi64_devices_list_emmc_mmc2="
+sun50i-a64-bananapi-m64
 sun50i-a64-pinebook
 sun50i-a64-pinetab
+sun50i-a64-pinephone
+sun50i-a64-sopine-baseboard
 sun50i-a64-teres-i
+sun50i-h5-libretech-all-h3-cc
+sun50i-h6-pine-h64
 "
 
 export SOLUTION=sunxi64-gui
@@ -31,13 +45,13 @@ EOF
 	if [ "$MIRROR" ]; then
 		ciel switchmirror "$MIRROR"
 	fi
-	DEVICE_NAME=$i ciel generate sunxi64-gnome
+	DEVICE_NAME=$i ciel generate sunxi64-lxde
 	if [ "$MIRROR" ]; then
 		ciel switchmirror origin
 	fi
 	ciel down
 	cp resolved.conf.backup .ciel/container/dist/etc/systemd/resolved.conf 
-	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_gnome_$i
+	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_lxde_$i
 	TARBALL=$PWD/temp.tar DEVICE_NAME=$i ./raw-image-builder
 	if echo "$sunxi64_devices_list_emmc_mmc2" | grep "^$i\$"; then
 		TARBALL=$PWD/temp.tar DEVICE_NAME=$i MMC=2 ./raw-image-builder

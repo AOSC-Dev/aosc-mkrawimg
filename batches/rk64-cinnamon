@@ -2,20 +2,20 @@
 
 rm -f out/* aux_log/*
 
-sunxi64_devices_list="
-sun50i-a64-pinebook
-sun50i-a64-pinetab
-sun50i-a64-teres-i
+rk64_devices_list="
+rk3328-rock64
+rk3399-rockpro64
+rk3399-pinebook-pro
 "
 
-sunxi64_devices_list_emmc_mmc2="
-sun50i-a64-pinebook
-sun50i-a64-pinetab
-sun50i-a64-teres-i
+rk64_devices_list_emmc="
+rk3328-rock64
+rk3399-rockpro64
+rk3399-pinebook-pro
 "
 
-export SOLUTION=sunxi64-gui
-for i in $sunxi64_devices_list
+export SOLUTION=rk64-gui
+for i in $rk64_devices_list
 do
 	# STUB_TARBALL environment variable is needed
 	rm -rf .ciel resolved.conf.backup
@@ -31,16 +31,16 @@ EOF
 	if [ "$MIRROR" ]; then
 		ciel switchmirror "$MIRROR"
 	fi
-	DEVICE_NAME=$i ciel generate sunxi64-gnome
+	DEVICE_NAME=$i ciel generate rk64-cinnamon
 	if [ "$MIRROR" ]; then
 		ciel switchmirror origin
 	fi
 	ciel down
 	cp resolved.conf.backup .ciel/container/dist/etc/systemd/resolved.conf 
-	TARBALL=temp.tar COMPRESSOR=cat ciel release sunxi64_gnome_$i
+	TARBALL=temp.tar COMPRESSOR=cat ciel release rk64_cinnamon_$i
 	TARBALL=$PWD/temp.tar DEVICE_NAME=$i ./raw-image-builder
-	if echo "$sunxi64_devices_list_emmc_mmc2" | grep "^$i\$"; then
-		TARBALL=$PWD/temp.tar DEVICE_NAME=$i MMC=2 ./raw-image-builder
+	if echo "$rk64_devices_list_emmc" | grep "^$i\$"; then
+		TARBALL=$PWD/temp.tar DEVICE_NAME=$i MMC=1 ./raw-image-builder
 	fi
 	rm temp.tar*
 	for j in out/*.img # Uncompressed ones
