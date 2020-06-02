@@ -27,56 +27,32 @@ apt-get install ${DEPENDENCIES} -y > aux_log/"${image_name}".log
 
 dd if=/dev/zero of=out/"${image_name}".img bs=1M count="${IMAGE_TOTAL_SIZE}"
 
-if [ "$GDISK_COMMANDS" ]; then
-gdisk out/"${image_name}".img << EOF
-${GDISK_COMMANDS}
-EOF
+if [ "$(type -t "GDISK_COMMANDS")" = "function" ]; then
+    GDISK_COMMANDS "out/${image_name}.img"
 else
-fdisk out/"${image_name}".img << EOF
-$(if (("$TRIPLE_PARTITION")); then
-	echo "n"
-	echo "p" # Partition type p-Primary e-Extended
-	echo "1" # Partition number (1-4, default 1)
-	echo # First sector (2048-65535, default 2048)
-	echo "+${FIRST_PARTITION_SIZE}M" # Last sector, +sectors or +size{K,M,G,T,P} (2048-xxxxx, default xxxxx)
-	echo "n"
-	echo "p"
-	echo "2"
-	echo
-	echo "+${SECOND_PARTITION_SIZE}M"
-	echo "n"
-	echo "p"
-	echo "3"
-	echo
-	echo
-elif (("$DUAL_PARTITION")); then
-	echo "n"
-	echo "p" # Partition type p-Primary e-Extended
-	echo "1" # Partition number (1-4, default 1)
-	echo # First sector (2048-65535, default 2048)
-	echo "+${FIRST_PARTITION_SIZE}M" # Last sector, +sectors or +size{K,M,G,T,P} (2048-xxxxx, default xxxxx)
-	echo "n"
-	echo "p"
-	echo "2"
-	echo
-	echo
-else
-	echo "n"
-	echo "p"
-	echo "1"
-	echo
-	echo
-fi
-)
-
-${EXTRA_FDISK_COMMANDS}
-
-w
-EOF
+    PLAN="label:dos\nstart=2048"
+    # 2 partitions or more
+	if [ $(("$TRIPLE_PARTITION" + "$DUAL_PARTITION")) -ge 0 ]; then
+		# append size constraint to the first partition
+		PLAN+=",size=+${FIRST_PARTITION_SIZE}M"
+	fi
+    # 3 partitions
+	if (("$TRIPLE_PARTITION")); then
+		# append size constraint to the second partition
+		PLAN+="\nsize=+${SECOND_PARTITION_SIZE}M"
+	fi
+	# This `type=83` is actually a workaround for sfdisk to create a partition that is
+	# extended to the end of the disk since we don't know the start or size of the partition
+	PLAN+="\ntype=83\nwrite\n"
+    echo -e "$PLAN" | sfdisk /tmp/test.img
+    if [ "$(type -t "EXTRA_FDISK_COMMANDS")" = "function" ]; then
+        EXTRA_FDISK_COMMANDS "out/${image_name}.img"
+    fi
 fi
 
 loop_device=$(losetup -f)
 losetup -P -v "${loop_device}" out/"${image_name}".img
+partprobe
 
 if [ "$FIRST_PARTITION_TYPE" ]; then
 	"mkfs.${FIRST_PARTITION_TYPE}" "${loop_device}"p1

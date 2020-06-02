@@ -10,13 +10,9 @@ SECOND_PARTITION_TYPE=ext4
 
 DEPENDENCIES="git wget"
 
-EXTRA_FDISK_COMMANDS="
-t
-1
-b
-a
-1
-"
+function EXTRA_FDISK_COMMANDS () {
+	echo 'type=b,bootable' | sfdisk "$1" -N1
+}
 
 do_fill_image() {
 	# Get RPi firmware and Kernel.
