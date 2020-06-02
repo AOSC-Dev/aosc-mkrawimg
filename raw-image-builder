@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/bash -e
 
 if [ ! "$SOLUTION" ]; then
 	echo "Solution unspecified!" >&2
@@ -73,7 +73,7 @@ export IMAGE="$(readlink -e out/${image_name}.img)"
 export IMAGE_DEVICE="${loop_device}"
 
 temp_dir=$(mktemp -d)
-umonut_fail=0
+umount_fail=0
 pushd "$temp_dir"
 	if [ "$FIRST_PARTITION_TYPE" ]; then
 		mkdir p1
@@ -110,16 +110,16 @@ pushd "$temp_dir"
 	do_fill_image
 	sync && sleep 10
 	if [ -d p1 ]; then
-		umount p1 || umonut_fail=1
+		umount p1 || umount_fail=1
 	fi
 	if [ -d p2 ]; then
-		umount p2 || umonut_fail=1
+		umount p2 || umount_fail=1
 	fi
 	if [ -d p3 ]; then
-		umount p3 || umonut_fail=1
+		umount p3 || umount_fail=1
 	fi
 	if [ -d p4 ]; then
-		umount p4 || umonut_fail=1
+		umount p4 || umount_fail=1
 	fi
 popd
 
