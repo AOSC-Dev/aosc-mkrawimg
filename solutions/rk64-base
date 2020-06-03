@@ -9,13 +9,13 @@ DEPENDENCIES="uboot-tools wget gptfdisk"
 
 function GDISK_COMMANDS() {
     # alignment 64, partition 1: 64 to 16383, type 8301 (Linux reserved)
-    sgdisk -a 64 -n1:64:16383 -t1:8301 "$1"
     # alignment 64, partition 2: 16384 to 32767, type 8301 (Linux reserved)
-    sgdisk -a 64 -n2:16384:32767 -t2:8301 "$1"
     # alignment 64, partition 3: 32768 to 262143, type ef00 (EFI System Partition)
-    sgdisk -a 64 -n3:32768:262143 -t3:ef00 "$1"
     # alignment 64, partition 4: 32768 to end, type 8305 (Linux root [arm-64])
-    sgdisk -a 64 -N4 -t4:8305 "$1"
+    sgdisk -a 64 -n1:64:16383 -t1:8301 \
+		-n2:16384:32767 -t2:8301 \
+		-n3:32768:262143 -t3:ef00 \
+		-N4 -t4:8305 "$1"
 }
 
 if [ ! "$MMC" ] || [ "$MMC" = "0" ]; then
