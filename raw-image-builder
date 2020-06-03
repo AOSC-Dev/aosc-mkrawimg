@@ -1,4 +1,4 @@
-#! /bin/bash -e
+#! /bin/bash -eo pipefail
 
 # $1: partition number, $2: partition type, $3: partition mount options
 function mount_partition () {
@@ -79,7 +79,8 @@ fi
 
 loop_device=$(losetup -f)
 losetup -P -v "${loop_device}" out/"${image_name}".img
-partprobe
+sync
+partprobe "${loop_device}"
 
 if [ "$FIRST_PARTITION_TYPE" ]; then
 	"mkfs.${FIRST_PARTITION_TYPE}" "${loop_device}"p1
