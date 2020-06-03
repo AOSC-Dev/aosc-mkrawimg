@@ -1,4 +1,4 @@
-#! /bin/bash -eo pipefail
+#! /bin/bash -e
 
 # $1: partition number, $2: partition type, $3: partition mount options
 function mount_partition () {
@@ -47,6 +47,7 @@ fi
 source solutions/"$SOLUTION"
 
 mkdir -p out aux_log
+set -o pipefail
 
 image_name="${DEVICE_NAME}_${SOLUTION}_$(date -u +%F)${IMAGE_NAME_EXTRA}"
 
@@ -77,8 +78,7 @@ else
 	fi
 fi
 
-loop_device=$(losetup -f)
-losetup -P -v "${loop_device}" out/"${image_name}".img
+loop_device=$(losetup -Pfv out/"${image_name}".img)
 sync
 partprobe "${loop_device}"
 
