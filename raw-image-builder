@@ -71,7 +71,7 @@ else
 	# This `type=83` is actually a workaround for sfdisk to create a partition that is
 	# extended to the end of the disk since we don't know the start or size of the partition
 	PLAN+="\ntype=83\nwrite\n"
-	echo -e "$PLAN" | sfdisk /tmp/test.img
+	echo -e "$PLAN" | sfdisk "out/${image_name}.img"
 	if [ "$(type -t "EXTRA_FDISK_COMMANDS")" = "function" ]; then
 		EXTRA_FDISK_COMMANDS "out/${image_name}.img"
 	fi
