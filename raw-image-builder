@@ -78,7 +78,7 @@ else
 	fi
 fi
 
-loop_device=$(losetup -Pfv out/"${image_name}".img)
+loop_device=$(losetup -Pfv --show out/"${image_name}".img)
 sync
 partprobe "${loop_device}"
 
