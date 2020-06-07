@@ -1,7 +1,5 @@
 #! /bin/bash -e
 
-rm -f out/* aux_log/*
-
 sunxi_devices_list="
 sun4i-a10-cubieboard
 sun7i-a20-cubietruck

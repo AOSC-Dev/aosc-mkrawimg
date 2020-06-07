@@ -1,7 +1,5 @@
 #! /bin/bash -e
 
-rm -f out/* aux_log/*
-
 sunxi64_devices_list="
 sun50i-a64-pinebook
 sun50i-a64-pinetab

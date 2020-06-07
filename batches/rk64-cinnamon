@@ -1,7 +1,5 @@
 #! /bin/bash -e
 
-rm -f out/* aux_log/*
-
 rk64_devices_list="
 rk3328-rock64
 rk3399-rockpro64
