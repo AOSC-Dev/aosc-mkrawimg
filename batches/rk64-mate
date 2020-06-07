@@ -12,7 +12,7 @@ rk3399-rockpro64
 rk3399-pinebook-pro
 "
 
-export SOLUTION=rk64-gui
+export SOLUTION=rk64-mate
 for i in $rk64_devices_list
 do
 	# STUB_TARBALL environment variable is needed

@@ -12,7 +12,7 @@ sun50i-a64-pinetab
 sun50i-a64-teres-i
 "
 
-export SOLUTION=sunxi64-gui
+export SOLUTION=sunxi64-kde
 for i in $sunxi64_devices_list
 do
 	# STUB_TARBALL environment variable is needed

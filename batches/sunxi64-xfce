@@ -26,7 +26,7 @@ sun50i-h5-libretech-all-h3-cc
 sun50i-h6-pine-h64
 "
 
-export SOLUTION=sunxi64-gui
+export SOLUTION=sunxi64-xfce
 for i in $sunxi64_devices_list
 do
 	# STUB_TARBALL environment variable is needed
