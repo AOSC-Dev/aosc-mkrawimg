@@ -3,17 +3,23 @@
 sunxi64_devices_list="
 sun50i-a64-pine64-plus
 sun50i-a64-pinebook
+sun50i-a64-pinetab
+sun50i-a64-pinephone
 sun50i-a64-bananapi-m64
 sun50i-a64-sopine-baseboard
 sun50i-a64-teres-i
 sun50i-h5-libretech-all-h3-cc
+sun50i-h5-orangepi-pc2
 sun50i-h5-orangepi-prime
+sun50i-h5-nanopi-neo2
 sun50i-h6-pine-h64
 "
 
 sunxi64_devices_list_emmc_mmc2="
-sun50i-a64-pinebook
 sun50i-a64-bananapi-m64
+sun50i-a64-pinebook
+sun50i-a64-pinetab
+sun50i-a64-pinephone
 sun50i-a64-sopine-baseboard
 sun50i-a64-teres-i
 sun50i-h5-libretech-all-h3-cc
