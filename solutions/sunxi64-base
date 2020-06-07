@@ -61,6 +61,9 @@ do_fill_image() {
 			echo "wifi.scan-rand-mac-address=no" >> etc/NetworkManager/NetworkManager.conf
 			;;
 		esac
+		chroot "$PWD" useradd aosc -m
+		chroot "$PWD" usermod -a G audio,cdrom,video,wheel aosc
+		echo 'aosc:anthon' | chpasswd -R "$PWD"
 	popd
 	pushd p1
 		cp ../p2/usr/lib/aosc-os-arm64-sunxi-boot/linux-kernel-sunxi64/Image .

@@ -46,6 +46,9 @@ do_fill_image() {
 		else
 			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/584ede55ce34300d2b3cb4adb587e87bc28e0aff/presets/sunxi -O etc/default/u-boot
 		fi
+		chroot "$PWD" useradd aosc -m
+		chroot "$PWD" usermod -a G audio,cdrom,video,wheel aosc
+		echo 'aosc:anthon' | chpasswd -R "$PWD"
 	popd
 	pushd p1
 		cp ../p2/usr/lib/aosc-os-armel-sunxi-boot/linux-sunxi-${kernel_variant}/zImage .
