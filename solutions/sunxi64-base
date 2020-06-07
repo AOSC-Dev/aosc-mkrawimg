@@ -62,7 +62,7 @@ do_fill_image() {
 			;;
 		esac
 		chroot "$PWD" useradd aosc -m
-		chroot "$PWD" usermod -a G audio,cdrom,video,wheel aosc
+		chroot "$PWD" usermod -a -G audio,cdrom,video,wheel aosc
 		echo 'aosc:anthon' | chpasswd -R "$PWD"
 	popd
 	pushd p1
