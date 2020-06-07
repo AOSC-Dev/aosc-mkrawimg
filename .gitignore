@@ -2,3 +2,4 @@ out
 aux_log
 *.tar.xz
 cielfs
+.ciel
