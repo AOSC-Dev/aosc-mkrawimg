@@ -42,9 +42,9 @@ do_fill_image() {
 		# For u-boot-aosc-utils
 		mkdir -p etc/default
 		if [ "$MMC" = "2" ]; then
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/62291c87fb7b6e76c6ee7737b309d9a0659506a8/presets/sunxi-mmc2 -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/584ede55ce34300d2b3cb4adb587e87bc28e0aff/presets/sunxi-mmc2 -O etc/default/u-boot
 		else
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/62291c87fb7b6e76c6ee7737b309d9a0659506a8/presets/sunxi -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/584ede55ce34300d2b3cb4adb587e87bc28e0aff/presets/sunxi -O etc/default/u-boot
 		fi
 	popd
 	pushd p1

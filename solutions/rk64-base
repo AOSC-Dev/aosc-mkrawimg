@@ -48,9 +48,9 @@ do_fill_image() {
 		# For u-boot-aosc-utils
 		mkdir -p etc/default
 		if [ "$MMC" = "1" ]; then
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/121a9f11cd77c7c75a7ae0792e9b391e11a65fa7/presets/rk64-emmc -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/584ede55ce34300d2b3cb4adb587e87bc28e0aff/presets/rk64-emmc -O etc/default/u-boot
 		else
-			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/121a9f11cd77c7c75a7ae0792e9b391e11a65fa7/presets/rk64-sd -O etc/default/u-boot
+			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/584ede55ce34300d2b3cb4adb587e87bc28e0aff/presets/rk64-sd -O etc/default/u-boot
 		fi
 	popd
 	pushd p3
