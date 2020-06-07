@@ -1,5 +1,5 @@
 out
 aux_log
-*.tar.xz
+*.tar*
 cielfs
 .ciel
