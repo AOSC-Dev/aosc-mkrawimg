@@ -2,12 +2,14 @@
 
 sunxi64_devices_list="
 sun50i-a64-pinebook
+sun50i-a64-pinephone
 sun50i-a64-pinetab
 sun50i-a64-teres-i
 "
 
 sunxi64_devices_list_emmc_mmc2="
 sun50i-a64-pinebook
+sun50i-a64-pinephone
 sun50i-a64-pinetab
 sun50i-a64-teres-i
 "
