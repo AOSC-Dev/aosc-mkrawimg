@@ -3,3 +3,4 @@ aux_log
 *.tar*
 cielfs
 .ciel
+*.backup
