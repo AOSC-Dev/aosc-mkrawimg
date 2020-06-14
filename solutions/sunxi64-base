@@ -61,7 +61,7 @@ do_fill_image() {
 			echo "wifi.scan-rand-mac-address=no" >> etc/NetworkManager/NetworkManager.conf
 			;;
 		esac
-		chroot "$PWD" useradd aosc -m
+		chroot "$PWD" useradd aosc -m || true
 		chroot "$PWD" usermod -a -G audio,cdrom,video,wheel aosc
 		echo 'aosc:anthon' | chpasswd -R "$PWD"
 	popd
