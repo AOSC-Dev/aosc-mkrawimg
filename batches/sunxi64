@@ -1,0 +1,70 @@
+#! /bin/bash -e
+
+sunxi64_devices_list="
+sun50i-a64-pine64-plus
+sun50i-a64-pinebook
+sun50i-a64-pinetab-early-adopter
+sun50i-a64-pinephone-1.2
+sun50i-a64-bananapi-m64
+sun50i-a64-sopine-baseboard
+sun50i-a64-teres-i
+sun50i-h5-libretech-all-h3-cc
+sun50i-h5-orangepi-pc2
+sun50i-h5-orangepi-prime
+sun50i-h5-nanopi-neo2
+sun50i-h6-pine-h64
+"
+
+sunxi64_devices_list_emmc_mmc2="
+sun50i-a64-bananapi-m64
+sun50i-a64-pinebook
+sun50i-a64-pinetab-early-adopter
+sun50i-a64-pinephone-1.2
+sun50i-a64-sopine-baseboard
+sun50i-a64-teres-i
+sun50i-h5-libretech-all-h3-cc
+sun50i-h6-pine-h64
+"
+
+distro_variants="
+base
+cinnamon
+gnome
+kde
+lxde
+mate
+server
+xfce
+"
+
+for i in $distro_variants; do
+	export SOLUTION=sunxi64-$i
+	for j in $sunxi64_devices_list; do
+		aoscbootstrap \
+			stable ${i}-${j} ${REPO:-https://repo.aosc.io/debs} \
+			config /usr/share/aoscbootstrap/config/aosc-mainline.toml \
+			-x \
+			--arch ${ARCH:-$(dpkg --print-architecture)} \
+			-s \
+				/usr/share/aoscbootstrap/scripts/reset-repo.sh \
+				/usr/share/aoscbootstrap/scripts/enable-nvidia-drivers.sh \
+				/usr/share/aoscbootstrap/scripts/enable-dkms.sh \
+				/usr/share/aoscbootstrap/scripts/livekit.sh \
+			--include-files /usr/share/aoscbootstrap/recipes/sunxi64/${i}-${j}.lst \
+			-m bsp-sunxi
+
+		tar cvf ${i}-${j}.tar ${i}-${j}
+
+		TARBALL=$PWD/${i}-${j}.tar DEVICE_NAME=$j ./raw-image-builder
+		if echo "$sunxi64_devices_list_emmc" | grep "^$j\$"; then
+			TARBALL=$PWD/${i}-${j}.tar DEVICE_NAME=$j MMC=1 ./raw-image-builder
+		fi
+
+		rm -r ${i}-${j}.tar ${i}-${j}
+
+		for k in out/*.img; do
+			lz4 < $k > $k.lz4 && rm $k
+			sha256sum $k.lz4 > ${k}.lz4.sha256sum
+		done
+	done
+done
