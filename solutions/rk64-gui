@@ -1,5 +1,5 @@
 #!/bin/bash
-IMAGE_TOTAL_SIZE=7400
+IMAGE_TOTAL_SIZE=16000
 
 THIRD_PARTITION_TYPE=vfat
 FOURTH_PARTITION_TYPE=btrfs
@@ -34,39 +34,44 @@ fi
 
 do_fill_image() {
 	pushd p4
-		tar xfpa "${TARBALL}"
+		echo "Unpacking system distribution ..."
+		tar xfpa "${TARBALL}" --strip-components=1
+
+		echo "Generating aosc-arm.conf ..."
 		mkdir -p etc/
 		echo "/dev/mmcblk${MMC}p3 / btrfs compress=zstd,ssd 1 1" >> etc/fstab
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 		echo "FLASHER_SOLUTION=rockchip" >> etc/aosc-arm.conf
 		echo "RK_FIRMWARE_DEVICE=/dev/mmcblk${MMC}" >> etc/aosc-arm.conf
 		echo "RK_KERNEL_DEVICE=/dev/mmcblk${MMC}p3" >> etc/aosc-arm.conf
-		# The following is for cyanberry-config.
-		touch .rootfs-repartition
-		mkdir -p etc/systemd/system/multi-user.target.wants
-		ln -sfv ../../../lib/systemd/system/rootfs-grow.service etc/systemd/system/multi-user.target.wants/
+
 		# For u-boot-aosc-utils
+		echo "Downloading u-boot configurations ..."
 		mkdir -p etc/default
 		if [ "$MMC" = "1" ]; then
 			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/584ede55ce34300d2b3cb4adb587e87bc28e0aff/presets/rk64-emmc -O etc/default/u-boot
 		else
 			wget https://github.com/AOSC-Dev/u-boot-aosc-utils/raw/584ede55ce34300d2b3cb4adb587e87bc28e0aff/presets/rk64-sd -O etc/default/u-boot
 		fi
-		chroot "$PWD" useradd aosc -m
-		chroot "$PWD" usermod -a -G audio,cdrom,video,wheel aosc
-		echo 'aosc:anthon' | chpasswd -R "$PWD"
 	popd
 	pushd p3
-		cp ../p4/usr/lib/aosc-os-arm64-rockchip-boot/linux-kernel-rk64/Image .
-		cp ../p4/usr/lib/aosc-os-arm64-rockchip-boot/dtb-${DEVICE_NAME}/dtb.dtb .
+		echo "Deploying Kernel image ..."
+		cp -v ../p4/usr/lib/aosc-os-arm64-rockchip-boot/linux-kernel-rk64/Image .
+		cp -v ../p4/usr/lib/aosc-os-arm64-rockchip-boot/dtb-${DEVICE_NAME}/dtb.dtb .
+
+		echo "Generating boot.cmd ..."
 		cat > boot.cmd << EOF
 load mmc ${UBOOT_MMC}:3 0x02080000 Image
 load mmc ${UBOOT_MMC}:3 0x01f00000 dtb.dtb
 setenv bootargs console=ttyS2,1500000 console=tty0 root=/dev/mmcblk${MMC}p4 rootwait earlyprintk panic=10
 booti 0x02080000 - 0x01f00000
 EOF
+
+		echo "Generating boot.scr ..."
 		mkimage -C none -A arm -T script -d boot.cmd boot.scr
 	popd
+
+	echo "Writing boot partitions ..."
 	dd if=p4/usr/lib/aosc-os-arm64-rockchip-boot/u-boot-${DEVICE_NAME}/idbloader.img of="${IMAGE_DEVICE}" bs=512 seek=64
 	dd if=p4/usr/lib/aosc-os-arm64-rockchip-boot/u-boot-${DEVICE_NAME}/u-boot.itb of="${IMAGE_DEVICE}" bs=512 seek=16384
 }
