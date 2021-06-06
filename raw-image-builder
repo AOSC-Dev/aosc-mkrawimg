@@ -5,15 +5,15 @@ function mount_partition () {
 	if [ "$2" ]; then
 		mkdir "$1"
 		if [ "$3" ]; then
-			mount -o "$3" "${loop_device}$1" "$1"
+			mount -v -o "$3" "${loop_device}$1" "$1"
 		else
-			mount "${loop_device}$1" "$1"
+			mount -v "${loop_device}$1" "$1"
 		fi
 	fi
 }
 
 function cleanup () {
-	echo 'Performing cleanup...'
+	echo 'Performing cleanup ...'
 	cd "$temp_dir" || exit 1
 	for i in 'p1' 'p2' 'p3' 'p4'; do
 		[ -d "$i" ] && umount "$i" || umount_fail=1
