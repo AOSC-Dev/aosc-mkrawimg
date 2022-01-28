@@ -1,0 +1,72 @@
+#!/bin/bash
+IMAGE_TOTAL_SIZE=975
+DUAL_PARTITION=0
+
+FIRST_PARTITION_SIZE=973
+FIRST_PARTITION_TYPE=ext4
+
+DEVICE_NAME=pc110
+
+do_fill_image() {
+	pushd p1
+		echo "Unpacking system distribution ..."
+		tar --numeric-owner -pxvf "${TARBALL}"
+
+		echo "FIXME: Hack, masking systemd-timesyncd ..."
+		arch-chroot . systemctl mask systemd-timesyncd
+
+		echo "Installing GRUB ..."
+		arch-chroot . grub-install \
+			--target=i386-pc \
+			"${loop_device}"
+		arch-chroot . grub-mkconfig \
+			-o /boot/grub/grub.cfg
+
+		echo "Tweaking GRUB configuration ..."
+		sed \
+			-e "s|${loop_device}p|/dev/sdb|g" \
+			-i boot/grub/grub.cfg
+
+		echo "Creating a swap file ..."
+		fallocate -l 64M swapfile
+		chmod -v 600 swapfile
+		mkswap swapfile
+		echo "/swapfile	swap		swap		defaults	0	0" \
+			>> etc/fstab
+
+		echo "Creating a post-install script to make first boot bearable ..."
+		cat > firstboot << 'EOF'
+#!/bin/bash
+echo -e "\n\033[31m>>>\033[0m Generating SSH host keys ..."
+ssh-keygen -A
+
+printf "\n\033[31m>>>\033[0m "
+read -p "Please enter your user name: "
+printf "    ... Creating user \"$REPLY\" ..."
+useradd $REPLY -m
+printf " DONE!\n"
+printf "    ... Setting essential groups for user \"$REPLY\" ..."
+usermod -a -G audio,cdrom,video,wheel $REPLY
+printf " DONE!\n"
+
+echo -e "\n\033[31m>>>\033[0m Setting password for user $REPLY ..."
+passwd $REPLY
+
+echo -e "\n\033[31m>>>\033[0m Setting root password ..."
+passwd root
+
+printf "\n\033[31m>>>\033[0m "
+read -p "Please enter your hostname (a-z letters, 0-9, and '-' only): "
+printf "    ... Setting hostname as \"$REPLY\" ..."
+echo "$REPLY" \
+	> /etc/hostname
+printf " DONE!\n"
+
+printf "\n\033[31m>>>\033[0m Removing first-boot script ..."
+unset REPLY
+rm /firstboot
+printf " DONE!\n\n"
+EOF
+		chmod -v +x firstboot
+	popd
+}
