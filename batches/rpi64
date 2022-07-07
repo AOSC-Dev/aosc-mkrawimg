@@ -23,7 +23,7 @@ for i in $distro_variants; do
 	export SOLUTION=rpi64-$i
 	echo "Generating distribution ..."
 	aoscbootstrap \
-		stable ${i}-${j} ${REPO:-https://repo.aosc.io/debs} \
+		stable rpi64-${i} ${REPO:-https://repo.aosc.io/debs} \
 		--config /usr/share/aoscbootstrap/config/aosc-mainline.toml \
 		-x \
 		--arch ${ARCH:-arm64} \
@@ -35,15 +35,15 @@ for i in $distro_variants; do
 		--include-files /usr/share/aoscbootstrap/recipes/mainline/${i}-common.lst
 
 	echo "Creating distribution tarball ..."
-	tar cf ${i}-${j}.tar ${i}-${j}
+	tar cf rpi64-${i}.tar rpi64-${i}
 
 	for j in $rpi64_devices_list; do
 		echo "Generating raw image ..."
-		TARBALL=$PWD/${i}-${j}.tar DEVICE_NAME=$j ./raw-image-builder
+		TARBALL=$PWD/rpi64-${i}.tar DEVICE_NAME=$j ./raw-image-builder
 
 	done
 	echo "Removing generated distributions ..."
-	rm -r ${i}-${j}.tar ${i}-${j}
+	rm -r rpi64-${i}.tar rpi64-${i}
 done
 
 for i in out/*.img; do
