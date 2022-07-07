@@ -33,6 +33,7 @@ for i in $distro_variants; do
 		/usr/share/aoscbootstrap/scripts/enable-dkms.sh \
 		/usr/share/aoscbootstrap/scripts/rawimage.sh \
 		--include-files /usr/share/aoscbootstrap/recipes/rpi64/${i}-rpi64.lst
+		-m bsp-rpi
 
 	echo "Creating distribution tarball ..."
 	tar cf rpi64-${i}.tar rpi64-${i}
