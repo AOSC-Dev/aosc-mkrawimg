@@ -33,8 +33,6 @@ for i in $distro_variants; do
 				/usr/share/aoscbootstrap/scripts/enable-nvidia-drivers.sh \
 				/usr/share/aoscbootstrap/scripts/enable-dkms.sh \
 				/usr/share/aoscbootstrap/scripts/rawimage.sh \
-			--include-files /usr/share/aoscbootstrap/recipes/sunxi64/${i}-${j}.lst \
-			-m bsp-sunxi
 
 		echo "Creating distribution tarball ..."
 		tar cvf ${i}-${j}.tar ${i}-${j}
