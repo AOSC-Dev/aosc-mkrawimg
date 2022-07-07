@@ -1,0 +1,56 @@
+#! /bin/bash -e
+
+rpi64_devices_list="
+rpi-3b
+rpi-cm3
+rpi-4b
+rpi-400
+rpi-cm4
+"
+
+distro_variants="
+base
+cinnamon
+gnome
+kde
+lxde
+mate
+server
+xfce
+"
+
+for i in $distro_variants; do
+	export SOLUTION=rpi64-$i
+	for j in $rpi64_devices_list; do
+		echo "Generating distribution ..."
+		aoscbootstrap \
+			stable ${i}-${j} ${REPO:-https://repo.aosc.io/debs} \
+			--config /usr/share/aoscbootstrap/config/aosc-mainline.toml \
+			-x \
+			--arch ${ARCH:-arm64} \
+			-s \
+				/usr/share/aoscbootstrap/scripts/reset-repo.sh \
+				/usr/share/aoscbootstrap/scripts/enable-nvidia-drivers.sh \
+				/usr/share/aoscbootstrap/scripts/enable-dkms.sh \
+				/usr/share/aoscbootstrap/scripts/rawimage.sh \
+			--include-files /usr/share/aoscbootstrap/recipes/sunxi64/${i}-${j}.lst \
+			-m bsp-sunxi
+
+		echo "Creating distribution tarball ..."
+		tar cvf ${i}-${j}.tar ${i}-${j}
+
+		echo "Generating raw image ..."
+		TARBALL=$PWD/${i}-${j}.tar DEVICE_NAME=$j ./raw-image-builder
+
+		echo "Removing generated distributions ..."
+		rm -r ${i}-${j}.tar ${i}-${j}
+	done
+done
+
+for i in out/*.img; do
+	echo "Compressing $i ..."
+	lz4 -9 -vvv < $i > $i.lz4 && rm $i
+
+	echo "Creating checksum for $i ..."
+	sha256sum $i.lz4 > ${i}.lz4.sha256sum
+done
