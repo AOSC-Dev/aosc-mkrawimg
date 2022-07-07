@@ -7,6 +7,12 @@ SECOND_PARTITION_TYPE=ext4
 DEPENDENCIES="arch-chroot qemu-user-static"
 
 case $DEVICE_NAME in
+	"rpi-3b")
+		FULL_DEVICE_NAME="Raspberry Pi 3 Model B"
+		;;
+	"rpi-cm3")
+		FULL_DEVICE_NAME="Raspberry Pi Compute Module 3"
+		;;
 	"rpi-4b")
 		FULL_DEVICE_NAME="Raspberry Pi 4 Model B"
 		;;
@@ -24,8 +30,16 @@ esac
 
 function GDISK_COMMANDS() {
 	echo "[+] Partitioning disk..."
-	echo -e "label: gpt\nstart=2048,type=uefi,size=200MiB,\ntype=linux," | sfdisk $1
-	
+	case "$DEVICE_NAME" in
+		"rpi-3b"|"rpi-cm3")
+			echo "[+] Using MBR partition table."
+			echo -e "label: dos\nstart=2048,type=0c,bootable,size=200MiB,\ntype=83," | sfdisk $1
+			;;
+		*)
+			echo "[+] Using GPT partition table."
+			echo -e "label: gpt\nstart=2048,type=uefi,size=200MiB,\ntype=linux," | sfdisk $1
+			;;
+	esac
 }
 
 # Note: needs a TARBALL environment variable
@@ -45,9 +59,10 @@ do_fill_image() {
 
 		echo "[+] Generating aosc-arm.conf ..."
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
+		echo "FULL_DEVICE_NAME=$FULL_DEVICE_NAME" >> etc/aosc-arm.conf
 	popd
 	echo "[+] Chrooting to target OS to perform post-installation actions..."
-	cat > p2/rpi4-postinst.bash << EOF
+	cat > p2/rpi64-postinst.bash << EOF
 #!/bin/bash
 
 set -e
@@ -72,7 +87,7 @@ echo "[+] Target OS setup done!"
 EOF
 
 	# Hope arch-chroot will bind-mount /run to the target.
-	arch-chroot ./p2 bash /rpi4-postinst.bash
-	rm p2/rpi4-postinst.bash
+	arch-chroot ./p2 bash /rpi64-postinst.bash
+	rm p2/rpi64-postinst.bash
 	echo "[+] Done."
 }
