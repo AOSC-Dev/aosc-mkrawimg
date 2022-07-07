@@ -1,0 +1,77 @@
+#!/bin/bash
+IMAGE_TOTAL_SIZE=4608
+
+FIRST_PARTITION_TYPE=vfat
+SECOND_PARTITION_TYPE=ext4
+
+DEPENDENCIES="sfdisk arch-chroot qemu-user-static"
+
+case $DEVICE_NAME in
+	"rpi-4b")
+		FULL_DEVICE_NAME="Raspberry Pi 4 Model B"
+		;;
+	"rpi-400")
+		FULL_DEVICE_NAME="Raspberry Pi 400"
+		;;
+	"rpi-cm4")
+		FULL_DEVICE_NAME="Raspberry Pi Compute Module 4"
+		;;
+	*)
+		echo "[-] Unsupported device: $DEVICE_NAME"
+		return 1
+		;;
+esac
+
+function GDISK_COMMANDS() {
+	cat | sfdisk $1 << EOF
+label: gpt
+type=uefi,size=200MiB,
+type=linux
+EOF
+	
+}
+
+# Note: needs a TARBALL environment variable
+
+do_fill_image() {
+	pushd p2
+		echo "[+] Unpacking system distribution ..."
+		tar xfpa "${TARBALL}" --strip-components=1
+
+		# Generate fstab
+		echo "[+] Generating fstab..."
+		BOOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEVICE}p1)"
+		ROOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEVICE}p2)"
+		
+		echo -e "${ROOT_PARTUUID}\t/\text4\trw,relatime\t0 1" >> etc/fstab
+		echo -e "${BOOT_PARTUUID}\t/\tvfat\trw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,errors=remount-ro \t0 2" >> etc/fstab
+
+		echo "[+] Generating aosc-arm.conf ..."
+		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
+	popd
+	echo "[+] Chrooting to target OS to perform post-installation actions..."
+	cat > /run/rpi4-postinst.bash << EOF
+#!/bin/bash
+
+set -e
+
+echo "[+] We are inside chroot now!"
+echo "[+] Mounting /boot/rpi"
+mkdir -p /boot/rpi
+mount "${IMAGE_DEVICE}p1" /boot/rpi
+
+# Install BSPs
+echo "[+] Adding BSP repository and installing BSP packages...
+cat /etc/apt/sources.list | grep '^deb' | sed -e '/main/bsp-rpi' | tee /etc/apt/sources.list.d/bsp-rpi.list
+
+apt update
+apt install -y linux+kernel+rpi64+lts
+
+sync
+umount /boot/rpi
+echo "[+] Target OS setup done!"
+EOF
+	# Hope arch-chroot will bind-mount /run to the target.
+	arch-chroot ./p2 bash /run/rpi4-postinst.sh
+	echo "[+] Done."
+}
