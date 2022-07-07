@@ -35,15 +35,15 @@ for i in $distro_variants; do
 		--include-files /usr/share/aoscbootstrap/recipes/mainline/${i}-common.lst
 
 	echo "Creating distribution tarball ..."
-	tar cvf ${i}-${j}.tar ${i}-${j}
+	tar cf ${i}-${j}.tar ${i}-${j}
 
 	for j in $rpi64_devices_list; do
 		echo "Generating raw image ..."
 		TARBALL=$PWD/${i}-${j}.tar DEVICE_NAME=$j ./raw-image-builder
 
-		echo "Removing generated distributions ..."
-		rm -r ${i}-${j}.tar ${i}-${j}
 	done
+	echo "Removing generated distributions ..."
+	rm -r ${i}-${j}.tar ${i}-${j}
 done
 
 for i in out/*.img; do
