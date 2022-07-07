@@ -4,7 +4,7 @@ IMAGE_TOTAL_SIZE=4608
 FIRST_PARTITION_TYPE=vfat
 SECOND_PARTITION_TYPE=ext4
 
-DEPENDENCIES="sfdisk arch-chroot qemu-user-static"
+DEPENDENCIES="arch-chroot qemu-user-static"
 
 case $DEVICE_NAME in
 	"rpi-4b")
@@ -23,11 +23,8 @@ case $DEVICE_NAME in
 esac
 
 function GDISK_COMMANDS() {
-	cat | sfdisk $1 << EOF
-label: gpt
-type=uefi,size=200MiB,
-type=linux
-EOF
+	echo "[+] Partitioning disk..."
+	echo -e "label: gpt\nstart=2048,type=uefi,size=200MiB,\ntype=linux," | sfdisk $1
 	
 }
 
@@ -43,14 +40,14 @@ do_fill_image() {
 		BOOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEVICE}p1)"
 		ROOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEVICE}p2)"
 		
-		echo -e "${ROOT_PARTUUID}\t/\text4\trw,relatime\t0 1" >> etc/fstab
-		echo -e "${BOOT_PARTUUID}\t/\tvfat\trw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,errors=remount-ro \t0 2" >> etc/fstab
+		echo -e "PARTUUID=${ROOT_PARTUUID}\t/\text4\trw,relatime\t0 1" >> etc/fstab
+		echo -e "PARTUUID=${BOOT_PARTUUID}\t/boot/rpi\tvfat\trw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,errors=remount-ro \t0 2" >> etc/fstab
 
 		echo "[+] Generating aosc-arm.conf ..."
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 	popd
 	echo "[+] Chrooting to target OS to perform post-installation actions..."
-	cat > /run/rpi4-postinst.bash << EOF
+	cat > p2/rpi4-postinst.bash << EOF
 #!/bin/bash
 
 set -e
@@ -61,17 +58,21 @@ mkdir -p /boot/rpi
 mount "${IMAGE_DEVICE}p1" /boot/rpi
 
 # Install BSPs
-echo "[+] Adding BSP repository and installing BSP packages...
-cat /etc/apt/sources.list | grep '^deb' | sed -e '/main/bsp-rpi' | tee /etc/apt/sources.list.d/bsp-rpi.list
+echo "[+] Adding BSP repository and installing BSP packages..."
+cat /etc/apt/sources.list | grep '^deb' | sed -e 's/main/bsp-rpi/g' | tee /etc/apt/sources.list.d/bsp-rpi.list
 
 apt update
 apt install -y linux+kernel+rpi64+lts
 
 sync
-umount /boot/rpi
+
+echo "[+] Unmounting /boot/rpi..."
+umount /boot/rpi || umount /boot/rpi
 echo "[+] Target OS setup done!"
 EOF
+
 	# Hope arch-chroot will bind-mount /run to the target.
-	arch-chroot ./p2 bash /run/rpi4-postinst.sh
+	arch-chroot ./p2 bash /rpi4-postinst.bash
+	rm p2/rpi4-postinst.bash
 	echo "[+] Done."
 }
