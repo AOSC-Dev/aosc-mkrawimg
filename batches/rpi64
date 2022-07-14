@@ -1,22 +1,14 @@
 #!/bin/bash -e
 
 rpi64_devices_list="
-rpi-3b
-rpi-cm3
-rpi-4b
-rpi-400
-rpi-cm4
+rpi-3
+rpi-4
 "
 
 distro_variants="
 base
-cinnamon
-gnome
-kde
-lxde
-mate
+desktop
 server
-xfce
 "
 
 for i in $distro_variants; do
