@@ -4,23 +4,16 @@ IMAGE_TOTAL_SIZE=7168
 FIRST_PARTITION_TYPE=vfat
 SECOND_PARTITION_TYPE=ext4
 
+# No partition sizes defined here - see GDISK_COMMANDS below.
+
 DEPENDENCIES="arch-chroot qemu-user-static"
 
 case $DEVICE_NAME in
-	"rpi-3b")
-		FULL_DEVICE_NAME="Raspberry Pi 3 Model B"
+	"rpi-3")
+		FULL_DEVICE_NAME="Raspberry Pi 3rd Gen"
 		;;
-	"rpi-cm3")
-		FULL_DEVICE_NAME="Raspberry Pi Compute Module 3"
-		;;
-	"rpi-4b")
-		FULL_DEVICE_NAME="Raspberry Pi 4 Model B"
-		;;
-	"rpi-400")
-		FULL_DEVICE_NAME="Raspberry Pi 400"
-		;;
-	"rpi-cm4")
-		FULL_DEVICE_NAME="Raspberry Pi Compute Module 4"
+	"rpi-4")
+		FULL_DEVICE_NAME="Raspberry Pi 4th Gen"
 		;;
 	*)
 		echo "[-] Unsupported device: $DEVICE_NAME"
@@ -30,8 +23,11 @@ esac
 
 function GDISK_COMMANDS() {
 	echo "[+] Partitioning disk..."
+	# Only Raspberry Pi 4th gen supports GPT boot - there's an embedded firmware which is upgradable.
+	# Raspberry Pi 3rd gen does not - their burnt-in Boot ROM does not support GPT.
+	# Don't think about Protective MBR - it is too tricky and risky.
 	case "$DEVICE_NAME" in
-		"rpi-3b"|"rpi-cm3")
+		"rpi-3")
 			echo "[+] Using MBR partition table."
 			echo -e "label: dos\nstart=2048,type=0c,bootable,size=200MiB,\ntype=83," | sfdisk $1
 			;;
@@ -63,96 +59,15 @@ do_fill_image() {
 	popd
 	pushd p1
 		echo "[+] Copying firmware and kernel..."
-		cp -r ../p2/usr/lib/rpi64/boot/* ./
-		cp -r ../p2/usr/lib/rpi64/kernel/* ./
+		cp -rv ../p2/usr/lib/rpi64/boot/* ./
+		cp -rv ../p2/usr/lib/rpi64/kernel/* ./
 		echo "[+] Generating config.txt ..."
-		cat > config.txt << EOF
-# For more options and information see
-# http://rpf.io/configtxt
-# Some settings may impact device functionality. See link above for details
-
-# uncomment if you get no picture on HDMI for a default "safe" mode
-# hdmi_safe=1
-
-# uncomment this if your display has a black border of unused pixels visible
-# and your display can output without overscan
-disable_overscan=1
-
-# uncomment the following to adjust overscan. Use positive numbers if console
-# goes off screen, and negative if there is too much border
-#overscan_left=16
-#overscan_right=16
-#overscan_top=16
-#overscan_bottom=16
-
-# uncomment to force a console size. By default it will be display's size minus
-# overscan.
-# framebuffer_width=1280
-# framebuffer_height=720
-
-# uncomment if hdmi display is not detected and composite is being output
-# hdmi_force_hotplug=1
-
-# uncomment to force a specific HDMI mode (this will force VGA)
-# hdmi_group=2
-# hdmi_mode=85
-
-# uncomment to force a HDMI mode rather than DVI. This can make audio work in
-# DMT (computer monitor) modes
-# hdmi_drive=2
-# gpu_mem=320
-
-# uncomment to increase signal to HDMI, if you have interference, blanking, or
-# no display
-#config_hdmi_boost=4
-
-# uncomment for composite PAL
-#sdtv_mode=2
-
-#uncomment to overclock the arm. 700 MHz is the default.
-#arm_freq=800
-
-# Uncomment some or all of these to enable the optional hardware interfaces
-# dtparam=i2c_arm=on
-# dtparam=i2s=on
-# dtparam=spi=on
-
-# Uncomment this to enable infrared communication.
-# dtoverlay=gpio-ir,gpio_pin=17
-# dtoverlay=gpio-ir-tx,gpio_pin=18
-enable_uart=1
-
-# Additional overlays and parameters are documented /boot/overlays/README
-# Enable audio (loads snd_bcm2835)
-dtparam=audio=on
-arm_64bit=1
-
-# Debug options
-# start_file=start_db.elf
-# start_debug=1
-
-[pi4]
-# Enable DRM VC4 V3D driver on top of the dispmanx display stack
-dtoverlay=vc4-fkms-v3d
-max_framebuffers=2
-# Uncomment this to overclock your SoC up to 1.8GHz
-# arm_boost=1
-# Uncomment this for autoloading Bluetooth UART
-# dtparam=krnbt=on
-
-[all]
-include distcfg.txt
-EOF
-	echo "[+] Generating distcfg.txt"
-	cat distcfg.txt << EOF
-arm_64bit=1
-kernel=kernel8.img
-# Uncomment this for initrd support
-# You should copy your initrd to boot partition before enabling initrd
-# initramfs initrd.img followkernel
-EOF
-	echo "[+] Generating cmdline.txt"
-	ROOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEV}p2)"
-	echo "rw root=PARTUUID=${ROOT_PARTUUID} fsck.repair=yes rootwait" > cmdline.txt
+		cp -v ../p2/usr/lib/rpi64/config/config.txt ./
+		echo "[+] Generating distcfg.txt..."
+		cp -v ../p2/usr/lib/rpi64/config/distcfg.txt ./
+		echo "[+] Generating cmdline.txt..."
+		ROOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEV}p2)"
+		echo "console=serial0,115200 console=tty1 rw root=PARTUUID=${ROOT_PARTUUID} fsck.repair=yes rootwait" | tee cmdline.txt
+	popd
 	echo "[+] Done."
 }
