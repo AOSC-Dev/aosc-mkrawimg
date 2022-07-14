@@ -56,6 +56,9 @@ do_fill_image() {
 		echo "[+] Generating aosc-arm.conf ..."
 		echo "DEVICE_NAME=$DEVICE_NAME" > etc/aosc-arm.conf
 		echo "FULL_DEVICE_NAME=$FULL_DEVICE_NAME" >> etc/aosc-arm.conf
+		echo "aosc-$DEVICE_NAME" > etc/hostname
+		echo -e "127.0.0.1\taosc-$DEVICE_NAME" >> etc/hosts
+		echo -e "::1\t\taosc-$DEVICE_NAME" >> etc/hosts
 	popd
 	pushd p1
 		echo "[+] Copying firmware and kernel..."
@@ -66,7 +69,7 @@ do_fill_image() {
 		echo "[+] Generating distcfg.txt..."
 		cp -v ../p2/usr/lib/rpi64/config/distcfg.txt ./
 		echo "[+] Generating cmdline.txt..."
-		ROOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEV}p2)"
+		ROOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEVICE}p2)"
 		echo "console=serial0,115200 console=tty1 rw root=PARTUUID=${ROOT_PARTUUID} fsck.repair=yes rootwait" | tee cmdline.txt
 	popd
 	echo "[+] Done."
