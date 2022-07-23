@@ -49,7 +49,7 @@ do_fill_image() {
 		echo "[+] Generating fstab..."
 		BOOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEVICE}p1)"
 		ROOT_PARTUUID="$(lsblk -no PARTUUID ${IMAGE_DEVICE}p2)"
-		
+		mkdir -p boot/rpi
 		echo -e "PARTUUID=${ROOT_PARTUUID}\t/\text4\trw,relatime\t0 1" >> etc/fstab
 		echo -e "PARTUUID=${BOOT_PARTUUID}\t/boot/rpi\tvfat\trw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,utf8,errors=remount-ro \t0 2" >> etc/fstab
 
