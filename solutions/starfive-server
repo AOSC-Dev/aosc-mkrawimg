@@ -1,0 +1,83 @@
+#!/bin/bash
+IMAGE_TOTAL_SIZE=4000
+
+THIRD_PARTITION_TYPE=vfat
+FOURTH_PARTITION_TYPE=btrfs
+FOURTH_PARTITION_MOUNT_OPTIONS="compress=zstd"
+DEPENDENCIES="arch-chroot"
+
+IMAGE_NAME_EXTRA="_${STORAGE_TYPE}"
+
+function GDISK_COMMANDS() {
+	echo "Partitioning disk..."
+	cat <<-EOF | sfdisk "$1"
+		label: gpt
+		unit: sectors
+		sector-size: 512
+		part1: start=4096,  size=4096,   type=2E54B353-1271-4842-806F-E436D6AF6985, name=spl
+		part2: start=8192,  size=8192,   type=5B193300-FC78-40CD-8002-E86C45580B47, name=uboot
+		part3: start=16384, size=307200, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, name=efi
+		part4: start=323584,             type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, name=root
+		EOF
+	sync
+}
+
+# Note: needs a TARBALL environment variable
+
+do_fill_image() {
+	pushd p4
+		echo "Unpacking system distribution ..."
+		mkdir boot
+		mount --bind ../p3 boot
+		tar xfpa "${TARBALL}" --strip-components=1
+
+		echo "Generating uEnv.txt ..."
+		cat > boot/uEnv.txt <<- EOF
+			fdt_high=0xffffffffffffffff
+			initrd_high=0xffffffffffffffff
+			kernel_addr_r=0x40200000
+			kernel_comp_addr_r=0x5a000000
+			kernel_comp_size=0x4000000
+			fdt_addr_r=0x46000000
+			ramdisk_addr_r=0x46100000
+			#Move distro to first boot to speed up booting
+			boot_targets=distro mmc0 dhcp
+			#Fix wrong fdtfile name
+			fdtfile=starfive/${DEVICE_NAME}.dtb
+			#Fix missing bootcmd
+			bootcmd=run load_distro_uenv;run bootcmd_distro
+		EOF
+
+		echo "Generating fstab ..."
+		cat >> etc/fstab <<- EOF
+			/dev/mmcblk1p3 /boot vfat  defaults               0 2
+			/dev/mmcblk1p4 /     btrfs defaults,compress=zstd 0 1
+		EOF
+
+		echo "Configuring U-Boot ..."
+		cat > etc/default/u-boot <<- EOF
+			U_BOOT_UPDATE="true"
+			U_BOOT_PARAMETERS="rw console=tty0 console=ttyS0,115200 earlycon rootwait stmmaceth=chain_mode:1 selinux=0"
+			U_BOOT_ROOT="root=/dev/mmcblk1p4"
+			U_BOOT_FDT_DIR="/dtbs/dtbs-"
+			U_BOOT_SYNC_DTBS=true
+		EOF
+		case "$STORAGE_TYPE" in
+			emmc)
+				sed -i 's/mmcblk1/mmcblk0/g' etc/fstab
+				sed -i 's/mmcblk1/mmcblk0/g' etc/default/u-boot
+				;;
+			nvme)
+				sed -i 's/mmcblk1/nvme0n1/g' etc/fstab
+				sed -i 's/mmcblk1/nvme0n1/g' etc/default/u-boot
+				;;
+		esac
+
+		echo "Syncing dtbs to /boot ..."
+		_KERNEL=$(ls boot/vmlinux-* | sed 's#boot/vmlinux-##')
+		arch-chroot . /etc/kernel/postinst.d/zz-u-boot-menu ${_KERNEL}
+		
+		sync
+		umount boot
+	popd
+}
